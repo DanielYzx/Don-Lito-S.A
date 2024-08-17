@@ -1,0 +1,141 @@
+
+
+body {
+    background-color: #D9D9D9; /* Fondo de pantalla gris claro */
+}
+
+.form-control {
+    background-color: #777777; /* Fondo del campo de búsqueda blanco */
+    border: 1px solid #777777; /* Borde del campo de búsqueda */
+}
+.form-control::placeholder {
+    color: #f0e6e6; /* Color del texto del placeholder */
+}
+
+.vertical-divider {
+    height: 40px; /* Altura del divisor */
+    border-left: 2px solid #0c0b0b; /* Borde izquierdo para crear la barra vertical */
+    margin: 0 10px; /* Espaciado alrededor del divisor */
+}
+
+.nav-buttons {
+    background-color: #6c757d; /* Color de fondo de los botones */
+    color: white; /* Color del texto en los botones */
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    text-align: center;
+    white-space: nowrap; /* Evitar que el texto se divida en varias líneas */
+    margin: 2px; /* Espacio entre los botones */
+    width: 187px; /* Ancho inicial de los botones */
+    height: 101px; /* Alto inicial de los botones */
+}
+.nav-buttons:hover {
+    background-color: #5a6268; /* Color de fondo cuando se pasa el mouse por encima */
+}
+.nav-container {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los botones se ajusten y envuelvan automáticamente */
+    gap: 2px; /* Espacio entre los botones */
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .nav-buttons {
+        width: 100%; /* Los botones ocuparán el 100% del contenedor en pantallas pequeñas */
+        height: auto; /* Ajusta el alto automáticamente */
+    }
+}
+
+
+.carousel-item img {
+    width: 100%;
+    height: 125px; /* Altura fija del carrusel */
+    object-fit: cover; /* Ajusta la imagen al contenedor, priorizando el ancho */
+}
+
+.container .row {
+    justify-content: center; /* Centra las cards */
+    gap: 1px; /* Espacio entre las cards */
+}
+
+
+.container {
+    max-width: 1200px;
+}
+
+.card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    text-decoration: none;
+    background-color: #777777; /* Color de fondo verde */
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 190px; /* Ancho de la tarjeta */
+    height: 275px; /* Altura de la tarjeta */
+    margin: 5px;
+}
+
+.card-img {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 55%; /* Ocupa la mitad inferior de la tarjeta */
+    overflow: hidden;
+    border-top-left-radius: 50% 50px; /* Semicírculo en la parte superior */
+    border-top-right-radius: 50% 50px; /* Semicírculo en la parte superior */
+}
+
+.card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.card-body {
+    padding: 10px;
+    text-align: center;
+    background-color: #777777;
+    color: white;
+}
+
+.card-text {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.card:hover {
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+}
+
+.card:active {
+    transform: translateY(2px);
+}
+
+/* Estilo para el navbar */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #D9D9D9;
+    z-index: 1000; /* Asegúrate de que esté por encima de otros contenidos */
+}
+
+/* Estilo para el contenido principal */
+.main-content {
+    margin-top: 217px; /* Ajusta según la altura del navbar */
+    padding: 1rem; /* Espaciado adicional para el contenido */
+}
+
+
+
