@@ -137,5 +137,18 @@ body {
     padding: 1rem; /* Espaciado adicional para el contenido */
 }
 
-
+.iframe-container {
+    display: none; /* Oculta el iframe por defecto */
+    position: fixed;
+    top: 217px; /* Ajusta según la altura del navbar */
+    left: 0;
+    width: 60vh;
+    height: 100%; /* 75% del alto de la pantalla */
+    background-color: white;
+    border: none;
+    z-index: 1000; /* Asegúrate de que esté por encima del contenido */
+}
+.iframe-container.show {
+    display: block;
+}
 
