@@ -28,7 +28,7 @@ body {
     white-space: nowrap; /* Evitar que el texto se divida en varias líneas */
     margin: 2px; /* Espacio entre los botones */
     width: 187px; /* Ancho inicial de los botones */
-    height: 101px; /* Alto inicial de los botones */
+    height: 50px; /* Alto inicial de los botones */
 }
 .nav-buttons:hover {
     background-color: #5a6268; /* Color de fondo cuando se pasa el mouse por encima */
