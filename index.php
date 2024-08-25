@@ -26,9 +26,9 @@
                     <span>$ 0.00</span>
                 </div>
                 <div class="col-12 col-md-6 order-md-1">
-                    <form class="d-flex mt-2 mt-md-0">
-                        <input class="form-control me-2" type="search" placeholder="¿Qué estás buscando?" aria-label="Search">
-                        <button type="button" class="btn btn-success">
+                    <form class="d-flex mt-2 mt-md-0" action="buscar.php" method="POST"> 
+                        <input class="form-control me-2" type="search" name="busqueda" placeholder="¿Qué estás buscando?" aria-label="Search">
+                        <button type="submit" class="btn btn-success">
                             <img src="img/buscar.png" alt="Buscar" width="20" height="20">
                         </button>
                     </form>
