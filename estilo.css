@@ -27,7 +27,7 @@ body {
     text-align: center;
     white-space: nowrap; /* Evitar que el texto se divida en varias líneas */
     margin: 2px; /* Espacio entre los botones */
-    width: 187px; /* Ancho inicial de los botones */
+    width: 180px; /* Ancho inicial de los botones */
     height: 50px; /* Alto inicial de los botones */
 }
 .nav-buttons:hover {
@@ -135,14 +135,14 @@ body {
 
 /* Estilo para el contenido principal */
 .main-content {
-    margin-top: calc(45px + 65px); /* Ajusta según la altura del navbar */
+    margin-top: 65px; /* Ajusta según la altura del navbar */
     padding: 1rem; /* Espaciado adicional para el contenido */
 }
 
 .iframe-container {
     display: none; /* Oculta el iframe por defecto */
     position: fixed;
-    top:calc(45px + 65px); /* Ajusta según la altura del navbar */
+    top:160px; /* Ajusta según la altura del navbar */
     left: 0;
     width: 60vh;
     height: 100%; /* 75% del alto de la pantalla */
