@@ -142,7 +142,7 @@ body {
 .iframe-container {
     display: none; /* Oculta el iframe por defecto */
     position: fixed;
-    top:160px; /* Ajusta según la altura del navbar */
+    top:190px; /* Ajusta según la altura del navbar */
     left: 0;
     width: 60vh;
     height: 100%; /* 75% del alto de la pantalla */
