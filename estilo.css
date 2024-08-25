@@ -52,6 +52,7 @@ body {
     width: 100%;
     height: 125px; /* Altura fija del carrusel */
     object-fit: cover; /* Ajusta la imagen al contenedor, priorizando el ancho */
+    margin-top: 20px; /* Ajusta el valor según la distancia que desees */
 }
 
 .container .row {
@@ -127,20 +128,21 @@ body {
     top: 0;
     left: 0;
     width: 100%;
+    height: auto;
     background-color: #D9D9D9;
     z-index: 1000; /* Asegúrate de que esté por encima de otros contenidos */
 }
 
 /* Estilo para el contenido principal */
 .main-content {
-    margin-top: 217px; /* Ajusta según la altura del navbar */
+    margin-top: calc(45px + 65px); /* Ajusta según la altura del navbar */
     padding: 1rem; /* Espaciado adicional para el contenido */
 }
 
 .iframe-container {
     display: none; /* Oculta el iframe por defecto */
     position: fixed;
-    top: 217px; /* Ajusta según la altura del navbar */
+    top:calc(45px + 65px); /* Ajusta según la altura del navbar */
     left: 0;
     width: 60vh;
     height: 100%; /* 75% del alto de la pantalla */

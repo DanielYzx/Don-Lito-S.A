@@ -34,7 +34,10 @@
                     </form>
                 </div>
             </div>
-            <div class="row mt-3">
+        </div>
+    </nav>
+    <div class="main-content">
+    <div class="row mt-3">
                 <div class="col-12 nav-container">
                     <button class="nav-buttons" id="btnCategorias" >
                         <img src="img/menu.png" alt="menu">
@@ -49,9 +52,6 @@
                     <button class="nav-buttons">Cuidado de la mascota</button>
                 </div>
             </div>
-        </div>
-    </nav>
-    <div class="main-content">
      <!-- Carrusel de imágenes de ofertas -->
      <div id="carouselOfertas" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
