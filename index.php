@@ -39,20 +39,31 @@
     </nav>
 
     <div class="main-content">
-        <div class="row mt-3">
-            <div class="col-12 nav-container">
-                <button class="nav-buttons" id="btnCategorias">
-                    <img src="img/menu.png" alt="menu">
-                    Todas las categorías
-                </button>
+    <div class="row mt-3">
+        <div class="col-12 nav-container">
+            <!-- Contenedor de los botones -->
+            <div class="buttons-container">
+                <div class="dropdown">
+                    <button class="nav-buttons dropdown-toggle" id="btnCategorias" type="button">
+                        <img src="img/menu.png" alt="menu">
+                        Todas las categorías
+                    </button>
+                    <div class="dropdown-menu" id="subMenuCategorias">
+                        <a class="dropdown-item" href="#">Categoría 1</a>
+                        <a class="dropdown-item" href="#">Categoría 2</a>
+                        <a class="dropdown-item" href="#">Categoría 3</a>
+                        <!-- Agrega más elementos según sea necesario -->
+                    </div>
+                </div>
+                <!-- Otros botones -->
                 <button class="nav-buttons">Productos frescos</button>
                 <button class="nav-buttons">Bebidas</button>
                 <button class="nav-buttons">Cuidado personal</button>
                 <button class="nav-buttons">Cuidado del hogar</button>
                 <button class="nav-buttons">Cuidado del bebé</button>
-                <button class="nav-buttons">Cuidado de la mascota</button>
             </div>
         </div>
+    </div>
 
         <!-- Carrusel de imágenes de ofertas -->
         <div id="carouselOfertas" class="carousel slide" data-bs-ride="carousel">
@@ -111,24 +122,7 @@
     </div>
 
     <script src="js/bootstrap.bundle.min.js"></script>
+   <script src="scroll.js"></script>
     
-    <!-- Contenedor para el iframe -->
-    <iframe class="iframe-container" id="categoriasFrame" src="Categorias.html"></iframe>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Asegúrate de que el iframe esté oculto al cargar la página
-            var iframe = document.getElementById('categoriasFrame');
-            iframe.classList.remove('show');
-            
-            // Lleva el scroll a la parte superior de la página
-            window.scrollTo(0, 0);
-        });
-
-        document.getElementById('btnCategorias').addEventListener('click', function() {
-            var iframe = document.getElementById('categoriasFrame');
-            iframe.classList.toggle('show'); // Muestra/oculta el iframe
-        });
-    </script>
 </body>
 </html>

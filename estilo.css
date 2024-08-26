@@ -27,7 +27,7 @@ body {
     text-align: center;
     white-space: nowrap; /* Evitar que el texto se divida en varias líneas */
     margin: 2px; /* Espacio entre los botones */
-    width: 180px; /* Ancho inicial de los botones */
+    width: 220px; /* Ancho inicial de los botones */
     height: 50px; /* Alto inicial de los botones */
 }
 .nav-buttons:hover {
@@ -48,6 +48,97 @@ body {
 }
 
 
+/* Estilo del submenú */
+.dropdown-menu {
+    display: none; /* Oculto por defecto */
+    position: absolute; /* Alineación vertical al botón */
+    top: 100%; /* Aparecer justo debajo del botón */
+    left: 0;
+    background-color: #6c757d; /* Color de fondo igual a los botones */
+    border-radius: 4px;
+    padding: 0; /* Elimina el padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-menu .dropdown-item {
+    color: white;
+    padding: 10px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #5a6268; /* Mismo color de hover que los botones */
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block; /* Muestra el submenú al pasar el mouse sobre el botón */
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .dropdown {
+        width: 100%; /* Los botones ocuparán el 100% del contenedor en pantallas pequeñas */
+        height: auto; /* Ajusta el alto automáticamente */
+    }
+}
+
+/* Estilos por defecto */
+.buttons-container {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los botones se ajusten en varias líneas */
+}
+
+/* Estilos para los botones */
+.nav-buttons {
+    background-color: #6c757d; /* Color de fondo */
+    color: white; /* Color del texto */
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    text-align: center;
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    margin: 2px; /* Espacio entre los botones */
+    width: 215px; /* Ancho inicial de los botones */
+    height: 50px; /* Alto inicial de los botones */
+}
+
+.nav-buttons:hover {
+    background-color: #5a6268; /* Color de fondo cuando se pasa el mouse por encima */
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    .buttons-container .nav-buttons {
+        display: none; /* Oculta todos los botones */
+    }
+
+    .buttons-container .nav-buttons#btnCategorias {
+        display: block; /* Muestra el botón de todas las categorías */
+        position: fixed; /* Mantiene el botón en una posición fija */
+        left: 0; /* Alineación a la izquierda */
+        width: 100%; /* Ancho completo del contenedor para facilitar el acceso */
+        z-index: 1000; /* Asegura que el botón esté sobre otros elementos */
+        background-color: #6c757d; /* Color de fondo */
+        color: white; /* Color del texto */
+        border: none; /* Sin borde */
+        padding: 10px; /* Espaciado interno */
+        text-align: center; /* Centra el texto */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Sombra para mejor visibilidad */
+        margin-top: 20px; /* Ajusta este valor al alto del navbar para asegurar que el botón esté debajo del navbar */
+    }
+}
+
+
+/* Para el submenú de categorías */
+.dropdown-menu {
+    display: none; /* Ocultarlo por defecto */
+}
+
+.dropdown-menu.show {
+    display: block; /* Muestra el submenú */
+}
 .carousel-item img {
     width: 100%;
     height: 125px; /* Altura fija del carrusel */
@@ -138,19 +229,3 @@ body {
     margin-top: 65px; /* Ajusta según la altura del navbar */
     padding: 1rem; /* Espaciado adicional para el contenido */
 }
-
-.iframe-container {
-    display: none; /* Oculta el iframe por defecto */
-    position: fixed;
-    top:190px; /* Ajusta según la altura del navbar */
-    left: 0;
-    width: 60vh;
-    height: 100%; /* 75% del alto de la pantalla */
-    background-color: white;
-    border: none;
-    z-index: 1000; /* Asegúrate de que esté por encima del contenido */
-}
-.iframe-container.show {
-    display: block;
-}
-
