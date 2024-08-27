@@ -8,9 +8,9 @@ $baseDeDatos = "don_lito";
 $conexion = new mysqli($host, $usuario, $password, $baseDeDatos);
 
 // Verificar conexión
-if ($conexion->connect_error) {
-    die("Error de conexión: " . $conexion->connect_error);
-} else {
-    echo "Conexión exitosa";
-}
+//if ($conexion->connect_error) {
+ //   die("Error de conexión: " . $conexion->connect_error);
+//} else {
+//    echo "Conexión exitosa";
+//}
 ?>

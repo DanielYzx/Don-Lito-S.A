@@ -58,6 +58,8 @@ body {
     border-radius: 4px;
     padding: 0; /* Elimina el padding */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100px; /* Ancho del submenú */
+    z-index: 1000; /* Asegura que el submenú esté sobre otros elementos */
 }
 
 .dropdown-menu .dropdown-item {
@@ -75,13 +77,60 @@ body {
 .dropdown:hover .dropdown-menu {
     display: block; /* Muestra el submenú al pasar el mouse sobre el botón */
 }
-
 /* Estilos responsivos */
 @media (max-width: 768px) {
     .dropdown {
         width: 100%; /* Los botones ocuparán el 100% del contenedor en pantallas pequeñas */
         height: auto; /* Ajusta el alto automáticamente */
     }
+}
+
+/* Estilo para el submenú horizontal */
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu .dropdown-menu-horizontal {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin-top: 0;
+    background-color: #343a40;
+    border: none;
+    padding: 10px;
+    white-space: nowrap;
+    
+}
+
+.dropdown-submenu:hover .dropdown-menu-horizontal {
+    display: flex;
+    flex-direction: row; /* Mostrar los elementos en línea horizontal */
+}
+
+.dropdown-menu-horizontal .dropdown-item {
+    color: white; /* Color del texto en los productos */
+    padding: 5px 10px;
+}
+
+.dropdown-item:hover {
+    background-color: #5a6268; /* Color de fondo al pasar el mouse */
+}
+
+/* Estilos para la categoría cuando se selecciona */
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item.active {
+    background-color: #3d93da; /* Cambia este color por el que prefieras */
+    color: white; /* Para mantener el texto en blanco */
+}
+
+/* Estilos para el producto cuando se selecciona */
+.submenu a:hover,
+.submenu a:focus,
+.submenu a.active {
+    background-color: #6c757d; /* Cambia este color por el que prefieras */
+    color: white; /* Para mantener el texto en blanco */
 }
 
 /* Estilos por defecto */

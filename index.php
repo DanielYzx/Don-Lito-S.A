@@ -43,18 +43,42 @@
         <div class="col-12 nav-container">
             <!-- Contenedor de los botones -->
             <div class="buttons-container">
-                <div class="dropdown">
-                    <button class="nav-buttons dropdown-toggle" id="btnCategorias" type="button">
-                        <img src="img/menu.png" alt="menu">
-                        Todas las categorías
-                    </button>
-                    <div class="dropdown-menu" id="subMenuCategorias">
-                        <a class="dropdown-item" href="#">Categoría 1</a>
-                        <a class="dropdown-item" href="#">Categoría 2</a>
-                        <a class="dropdown-item" href="#">Categoría 3</a>
-                        <!-- Agrega más elementos según sea necesario -->
-                    </div>
-                </div>
+            <div class="dropdown">
+    <button class="nav-buttons dropdown-toggle" id="btnCategorias" type="button">
+        <img src="img/menu.png" alt="menu">
+        Todas las categorías
+    </button>
+    <div class="dropdown-menu" id="subMenuCategorias">
+        <?php
+        // Consulta para obtener todas las categorías
+        $sql = "SELECT id, nombre FROM categorias";
+        $result = $conexion->query($sql);
+        
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo '<div class="dropdown-submenu">';
+                echo '<a class="dropdown-item" href="#">' . $row["nombre"] . '</a>';
+                
+                // Consulta para obtener los productos dentro de cada categoría
+                $sqlProductos = "SELECT nombre FROM productos WHERE categoria_id = " . $row["id"];
+                $resultProductos = $conexion->query($sqlProductos);
+                
+                if ($resultProductos->num_rows > 0) {
+                    echo '<div class="dropdown-menu-horizontal">';
+                    while ($producto = $resultProductos->fetch_assoc()) {
+                        echo '<a class="dropdown-item" href="#">' . $producto["nombre"] . '</a>';
+                    }
+                    echo '</div>';
+                }
+                
+                echo '</div>';
+            }
+        } else {
+            echo '<a class="dropdown-item" href="#">No hay categorías disponibles</a>';
+        }
+        ?>
+    </div>
+</div>
                 <!-- Otros botones -->
                 <button class="nav-buttons">Productos frescos</button>
                 <button class="nav-buttons">Bebidas</button>
