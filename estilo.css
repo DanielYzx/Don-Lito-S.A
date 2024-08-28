@@ -85,37 +85,7 @@ body {
     }
 }
 
-/* Estilo para el submenú horizontal */
-.dropdown-submenu {
-    position: relative;
-}
 
-.dropdown-submenu .dropdown-menu-horizontal {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 100%;
-    margin-top: 0;
-    background-color: #343a40;
-    border: none;
-    padding: 10px;
-    white-space: nowrap;
-    
-}
-
-.dropdown-submenu:hover .dropdown-menu-horizontal {
-    display: flex;
-    flex-direction: row; /* Mostrar los elementos en línea horizontal */
-}
-
-.dropdown-menu-horizontal .dropdown-item {
-    color: white; /* Color del texto en los productos */
-    padding: 5px 10px;
-}
-
-.dropdown-item:hover {
-    background-color: #5a6268; /* Color de fondo al pasar el mouse */
-}
 
 /* Estilos para la categoría cuando se selecciona */
 .dropdown-item:hover,
@@ -125,13 +95,6 @@ body {
     color: white; /* Para mantener el texto en blanco */
 }
 
-/* Estilos para el producto cuando se selecciona */
-.submenu a:hover,
-.submenu a:focus,
-.submenu a.active {
-    background-color: #6c757d; /* Cambia este color por el que prefieras */
-    color: white; /* Para mantener el texto en blanco */
-}
 
 /* Estilos por defecto */
 .buttons-container {
@@ -278,3 +241,63 @@ body {
     margin-top: 65px; /* Ajusta según la altura del navbar */
     padding: 1rem; /* Espaciado adicional para el contenido */
 }
+
+
+
+/* aqui inicia los estilos para el formulario de inicio de sesion */
+/* Superposición transparente */
+.login-overlay {
+    position: fixed;
+    top: 160px; /* Ajusta según la altura del navbar */
+    right: 0; /* Alinea el contenedor a la derecha */
+    width: 35%;/* ancho */
+    height: 73%;/* Alto*/
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo negro con transparencia */
+    display: flex;
+    justify-content: flex-end; /* Alinea el formulario dentro del contenedor hacia la derecha */
+    align-items: center;
+    z-index: 1000; /* Asegúrate de que esté por encima de otros elementos */
+
+   /* display: none;*/
+    /*justify-content: center;*/
+
+}
+
+/* Contenedor del formulario */
+.login-form-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+    margin-right: 20px; /* Ajusta la separación del formulario respecto al borde derecho */
+
+}
+
+.close-btn {
+    position: absolute;
+    top: 0px;
+    right: 5px;
+    background-color: transparent;
+    border: none;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #440cdf;
+
+
+    /*top: 10px;*/
+    /*right: 10px;*/
+    /*font-size: 24px;*/
+}
+
+.close-btn:hover {
+    color: #ff0000; /* Cambia el color al pasar el mouse */
+}
+
+
+/* aqui termina los estilos para el formulario*/
+
+
+

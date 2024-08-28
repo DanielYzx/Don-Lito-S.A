@@ -19,7 +19,7 @@
                 </div>
                 <div class="col-6 col-md-4 d-flex justify-content-end align-items-center order-md-2">
                     <img src="img/login.png" alt="User Icon" width="40" height="40" class="me-2">
-                    <button type="button" class="btn btn-primary">Inicia sesión</button>
+                    <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
                     <div class="vertical-divider"></div>
                     <button type="button" class="btn" width="40" height="40">
                         <img src="img/carrito.png" alt="Carrito Icon">
@@ -39,6 +39,26 @@
     </nav>
 
     <div class="main-content">
+
+    <!--  aqui inicia el Contenedor del formulario de inicio de sesión -->
+    <div class="login-overlay" id="loginFormContainer" style="display: none;">
+            <div class="login-form-container">
+            <button class="close-btn" id="closeBtn">&times;</button>
+                <h2>Iniciar Sesión</h2>
+                <form action="procesar_login.php" method="POST">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                </form>
+            </div>
+        </div>
+         <!-- aqui termina el Contenedor del formulario de inicio de sesión -->
     <div class="row mt-3">
         <div class="col-12 nav-container">
             <!-- Contenedor de los botones -->
@@ -49,42 +69,29 @@
         Todas las categorías
     </button>
     <div class="dropdown-menu" id="subMenuCategorias">
-        <?php
-        // Consulta para obtener todas las categorías
-        $sql = "SELECT id, nombre FROM categorias";
-        $result = $conexion->query($sql);
-        
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                echo '<div class="dropdown-submenu">';
-                echo '<a class="dropdown-item" href="#">' . $row["nombre"] . '</a>';
-                
-                // Consulta para obtener los productos dentro de cada categoría
-                $sqlProductos = "SELECT nombre FROM productos WHERE categoria_id = " . $row["id"];
-                $resultProductos = $conexion->query($sqlProductos);
-                
-                if ($resultProductos->num_rows > 0) {
-                    echo '<div class="dropdown-menu-horizontal">';
-                    while ($producto = $resultProductos->fetch_assoc()) {
-                        echo '<a class="dropdown-item" href="#">' . $producto["nombre"] . '</a>';
-                    }
-                    echo '</div>';
-                }
-                
-                echo '</div>';
-            }
-        } else {
-            echo '<a class="dropdown-item" href="#">No hay categorías disponibles</a>';
-        }
-        ?>
+    <?php
+// Consulta para obtener todas las categorías
+$sql = "SELECT id, nombre FROM categorias";
+$result = $conexion->query($sql);
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        echo '<div class="dropdown-submenu">';
+        echo '<a class="dropdown-item" href="productos.php?categoria_id=' . $row["id"] . '">' . $row["nombre"] . '</a>';
+        echo '</div>';
+    }
+} else {
+    echo '<a class="dropdown-item" href="#">No hay categorías disponibles</a>';
+}
+?>
     </div>
 </div>
                 <!-- Otros botones -->
-                <button class="nav-buttons">Productos frescos</button>
-                <button class="nav-buttons">Bebidas</button>
-                <button class="nav-buttons">Cuidado personal</button>
-                <button class="nav-buttons">Cuidado del hogar</button>
-                <button class="nav-buttons">Cuidado del bebé</button>
+<button class="nav-buttons" onclick="location.href='productos.php?categoria_id=1'">Electrónica</button>
+<button class="nav-buttons" onclick="location.href='productos.php?categoria_id=2'">Ropa</button>
+<button class="nav-buttons" onclick="location.href='productos.php?categoria_id=3'">Hogar</button>
+<button class="nav-buttons" onclick="location.href='productos.php?categoria_id=4'">Deportes</button>
+<button class="nav-buttons" onclick="location.href='productos.php?categoria_id=5'">Bebidas</button>
             </div>
         </div>
     </div>
@@ -146,7 +153,22 @@
     </div>
 
     <script src="js/bootstrap.bundle.min.js"></script>
-   <script src="scroll.js"></script>
-    
+   <script src="scroll.js"></script>    
+   <script>
+        // Función para mostrar el formulario
+        function showLoginForm() {
+            document.getElementById('loginFormContainer').style.display = 'flex';
+            
+        }
+
+
+        // Función para cerrar el formulario
+        document.getElementById("closeBtn").addEventListener("click", function() {
+            document.getElementById("loginFormContainer").style.display = "none";
+        });
+
+
+
+    </script>
 </body>
 </html>
