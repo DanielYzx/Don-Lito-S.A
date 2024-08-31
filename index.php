@@ -124,20 +124,27 @@ if ($result->num_rows > 0) {
             <div class="row justify-content-center">
             <?php
                 // Consulta para obtener las categorías destacadas
-                $sql = "SELECT nombre, imagen FROM categorias"; // Asegúrate de que esta consulta se ajuste a tu base de datos
+                $sql = "SELECT id,nombre, imagen FROM categorias"; // Asegúrate de que esta consulta se ajuste a tu base de datos
                 $result = $conexion->query($sql);
 
                 if ($result->num_rows > 0) {
                     // Generar tarjetas dinámicamente
                     while ($row = $result->fetch_assoc()) {
                         echo '<div class="col-auto">';
-                        echo '<a href="#" class="card btn text-center">';
+                       // echo '<a href="#" class="card btn text-center">';
+                        echo '<a href="productos.php?categoria_id=' . $row["id"] . '" class="card btn text-center">'; // Redirige a productos.php con el ID de la categoría
                         echo '<div class="card-body">';
                         echo '<p class="card-text">' . $row["nombre"] . '</p>';
                         echo '</div>';
                         echo '<div class="card-img">';
                         echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">';
                         echo '</div>';
+                        //  aqui comienza Mostrar la imagen desde la base de datos
+                       // echo '<div class="card-img">';
+                        // Mostrar la imagen desde la base de datos
+                        //echo '<img src="img/' . $row["imagen"] . '" alt="' . $row["nombre"] . '">';
+                        //echo '</div>';
+                        // a qui termina Mostrar la imagen desde la base de datos
                         echo '</a>';
                         echo '</div>';
                     }
@@ -151,7 +158,6 @@ if ($result->num_rows > 0) {
             </div>
         </div>
     </div>
-
     <script src="js/bootstrap.bundle.min.js"></script>
    <script src="scroll.js"></script>    
    <script>
