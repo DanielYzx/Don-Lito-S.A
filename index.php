@@ -198,15 +198,25 @@ function showLoginForm() {
 document.getElementById("closeBtn").addEventListener("click", function() {
     document.getElementById("loginFormContainer").style.display = "none";
     removeErrorParam(); // Limpiar el parámetro 'error'
+
+
+    // Ocultar el mensaje de error
+    const errorMsg = document.getElementById("errorMessage");
+    if (errorMsg) {
+        errorMsg.style.display = "none";
+
+    }
+
+    // Limpiar los campos del formulario
+    clearFormFields();
     
 
 });
 
-// Función para cerrar el formulario y limpiar campos
-//function closeLoginForm() {
-   // document.getElementById("loginForm").reset(); // Limpiar campos del formulario
-  //  removeErrorParam(); // Limpiar el parámetro 'error'
-
+// Función para limpiar los campos del formulario
+function clearFormFields() {
+    document.getElementById("loginForm").reset();
+}
 
 // Cerrar el formulario si se hace clic fuera de él
 window.onclick = function(event) {
@@ -215,6 +225,7 @@ window.onclick = function(event) {
         loginFormContainer.style.display = 'none';
         removeErrorParam(); // Limpiar el parámetro 'error' al cerrar haciendo clic fuera
     }
+
 
 };
 
