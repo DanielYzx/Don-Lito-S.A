@@ -1,4 +1,5 @@
 <?php
+// Inicia la sesión
 session_start();
 ?>
 <!DOCTYPE html>
@@ -21,11 +22,11 @@ session_start();
                     </a>
                 </div>
                 <div class="col-6 col-md-4 d-flex justify-content-end align-items-center order-md-2">
-                    <img src="img/login.png" alt="User Icon" width="40" height="40" class="me-2">
-                    <?php if (isset($_SESSION['usuario_nombre'])): ?>
-                        <span>Bienvenido, <?php echo $_SESSION['usuario_nombre']; ?></span>
-                        <a href="logout.php" class="btn btn-danger ms-3">Cerrar sesión</a>
+                    <?php if (isset($_SESSION['user_name'])): ?>
+                        <span class="me-2">Bienvenido, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                        <a href="cerrar_sesion.php" class="btn btn-danger">Cerrar sesión</a>
                     <?php else: ?>
+                        <img src="img/login.png" alt="User Icon" width="40" height="40" class="me-2">
                         <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
                     <?php endif; ?>
                     <div class="vertical-divider"></div>
@@ -47,26 +48,44 @@ session_start();
     </nav>
 
     <div class="main-content">
+   
+    <!-- Aquí inicia el Contenedor del formulario de inicio de sesión -->
+    <?php if (!isset($_SESSION['user_name'])): ?>
+<div class="login-overlay" id="loginFormContainer">
+    <div class="login-form-container">
+        <button class="close-btn" id="closeBtn">&times;</button>
+        <h2>Iniciar Sesión</h2>
 
-    <!--  aqui inicia el Contenedor del formulario de inicio de sesión -->
-    <div class="login-overlay" id="loginFormContainer" style="display: none;">
-            <div class="login-form-container">
-            <button class="close-btn" id="closeBtn">&times;</button>
-                <h2>Iniciar Sesión</h2>
-                <form action="procesar_login.php" method="POST">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo Electrónico</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-                </form>
+        <!-- Mostrar mensaje de error si existe -->
+<?php if (isset($_GET['error'])): ?>
+    <div class="alert alert-danger">
+        <?php echo htmlspecialchars($_GET['error']); ?>
+    </div>
+<?php endif; ?>
+
+        <form id="loginForm" action="procesar_login.php" method="POST">
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <input type="email" class="form-control" id="email" name="email" required>
             </div>
-        </div>
-         <!-- aqui termina el Contenedor del formulario de inicio de sesión -->
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3 text-end">
+                <a href="olvidaste_contrasena.php" class="text-muted">¿Olvidaste tu contraseña?</a>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            </div>
+            <div class="mt-3 text-center">
+                <a href="crear_cuenta.php" class="text-muted">¿No tienes cuenta? Crea una ahora</a>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
+    <!-- Aquí termina el Contenedor del formulario de inicio de sesión -->
     <div class="row mt-3">
         <div class="col-12 nav-container">
             <!-- Contenedor de los botones -->
@@ -166,23 +185,40 @@ if ($result->num_rows > 0) {
             </div>
         </div>
     </div>
+
     <script src="js/bootstrap.bundle.min.js"></script>
    <script src="scroll.js"></script>    
    <script>
-        // Función para mostrar el formulario
-        function showLoginForm() {
-            document.getElementById('loginFormContainer').style.display = 'flex';
-            
-        }
+ // Función para mostrar el formulario
+function showLoginForm() {
+    document.getElementById('loginFormContainer').style.display = 'flex';
+}
+
+// Función para cerrar el formulario
+document.getElementById("closeBtn").addEventListener("click", function() {
+    document.getElementById("loginForm").reset();
+    document.getElementById("loginFormContainer").style.display = "none";
+});
 
 
-        // Función para cerrar el formulario
-        document.getElementById("closeBtn").addEventListener("click", function() {
-            document.getElementById("loginFormContainer").style.display = "none";
-        });
 
 
+// Cerrar el formulario si se hace clic fuera de él
+window.onclick = function(event) {
+    var loginFormContainer = document.getElementById('loginFormContainer');
+    if (event.target == loginFormContainer) {
+        loginFormContainer.style.display = 'none';
+    }
+}
 
-    </script>
+// Mantén el formulario abierto si hay un error en la URL
+window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error')) {
+        showLoginForm();
+    }
+};
+</script>
+</script>
 </body>
-</html>
+</html>     
