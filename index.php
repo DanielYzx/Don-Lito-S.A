@@ -19,7 +19,12 @@
                 </div>
                 <div class="col-6 col-md-4 d-flex justify-content-end align-items-center order-md-2">
                     <img src="img/login.png" alt="User Icon" width="40" height="40" class="me-2">
-                    <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
+                    <?php if (isset($_SESSION['usuario_nombre'])): ?>
+                        <span>Bienvenido, <?php echo $_SESSION['usuario_nombre']; ?></span>
+                        <a href="logout.php" class="btn btn-danger ms-3">Cerrar sesión</a>
+                    <?php else: ?>
+                        <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
+                    <?php endif; ?>
                     <div class="vertical-divider"></div>
                     <button type="button" class="btn" width="40" height="40">
                         <img src="img/carrito.png" alt="Carrito Icon">
