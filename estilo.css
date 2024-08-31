@@ -245,22 +245,21 @@ body {
 
 
 /* aqui inicia los estilos para el formulario de inicio de sesion */
+/* aqui inicia los estilos para el formulario de inicio de sesion */
+/* Superposición transparente */
 /* Superposición transparente */
 .login-overlay {
     position: fixed;
     top: 160px; /* Ajusta según la altura del navbar */
     right: 0; /* Alinea el contenedor a la derecha */
-    width: 35%;/* ancho */
-    height: 73%;/* Alto*/
+    width: 35%;/* Ancho */
+    height: 73%;/* Alto */
+    border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.5); /* Fondo negro con transparencia */
-    display: flex;
-    justify-content: flex-end; /* Alinea el formulario dentro del contenedor hacia la derecha */
+    display: flex; /* Cambiado de none a flex */
+    justify-content: center; /* Centra el formulario horizontalmente */
     align-items: center;
     z-index: 1000; /* Asegúrate de que esté por encima de otros elementos */
-
-   /* display: none;*/
-    /*justify-content: center;*/
-
 }
 
 /* Contenedor del formulario */
@@ -271,31 +270,29 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     width: 90%;
     max-width: 400px;
+    max-height: 98%; /* Asegura que el contenedor del formulario no se salga de la superposición */
+    overflow-y: auto; /* Habilita el scroll interno si el contenido del formulario excede la altura */
     margin-right: 20px; /* Ajusta la separación del formulario respecto al borde derecho */
-
 }
 
+/* Botón de cierre */
 .close-btn {
     position: absolute;
-    top: 0px;
-    right: 5px;
+    top: 10px;
+    right: 10px;
     background-color: transparent;
     border: none;
-    font-size: 40px;
+    font-size: 36px;
     font-weight: bold;
     cursor: pointer;
     color: #440cdf;
-
-
-    /*top: 10px;*/
-    /*right: 10px;*/
-    /*font-size: 24px;*/
 }
 
 .close-btn:hover {
     color: #ff0000; /* Cambia el color al pasar el mouse */
 }
 
+/* aqui termina los estilos para el formulario*/
 
 /* aqui termina los estilos para el formulario*/
 

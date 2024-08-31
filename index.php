@@ -58,7 +58,7 @@ session_start();
 
         <!-- Mostrar mensaje de error si existe -->
 <?php if (isset($_GET['error'])): ?>
-    <div class="alert alert-danger">
+    <div id="errorMessage" class="alert alert-danger" >
         <?php echo htmlspecialchars($_GET['error']); ?>
     </div>
 <?php endif; ?>
@@ -196,11 +196,16 @@ function showLoginForm() {
 
 // Función para cerrar el formulario
 document.getElementById("closeBtn").addEventListener("click", function() {
-    document.getElementById("loginForm").reset();
     document.getElementById("loginFormContainer").style.display = "none";
+    removeErrorParam(); // Limpiar el parámetro 'error'
+    
+
 });
 
-
+// Función para cerrar el formulario y limpiar campos
+//function closeLoginForm() {
+   // document.getElementById("loginForm").reset(); // Limpiar campos del formulario
+  //  removeErrorParam(); // Limpiar el parámetro 'error'
 
 
 // Cerrar el formulario si se hace clic fuera de él
@@ -208,16 +213,31 @@ window.onclick = function(event) {
     var loginFormContainer = document.getElementById('loginFormContainer');
     if (event.target == loginFormContainer) {
         loginFormContainer.style.display = 'none';
+        removeErrorParam(); // Limpiar el parámetro 'error' al cerrar haciendo clic fuera
     }
-}
+
+};
 
 // Mantén el formulario abierto si hay un error en la URL
 window.onload = function() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('error')) {
         showLoginForm();
+        removeErrorParam(); // Limpiar el parámetro 'error' después de mostrar el formulario
     }
 };
+
+// Función para limpiar el parámetro 'error' de la URL
+function removeErrorParam() {
+    const url = new URL(window.location);
+    url.searchParams.delete('error');
+    window.history.replaceState({}, document.title, url);
+}
+
+// Ocultar el contenedor del formulario
+document.getElementById("loginFormContainer").style.display = "none";
+
+
 </script>
 </script>
 </body>
