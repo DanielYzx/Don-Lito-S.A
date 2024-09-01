@@ -2,6 +2,15 @@
 // Inicia la sesión
 session_start();
 ?>
+
+<?php
+// Agrega este código antes del HTML del formulario
+if (isset($_SESSION['form_data'])) {
+    echo "<pre>";
+    print_r($_SESSION['form_data']); // Imprime los datos del formulario en la página
+    echo "</pre>";
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,19 +82,100 @@ session_start();
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
             <div class="mb-3 text-end">
-                <a href="olvidaste_contrasena.php" class="text-muted">¿Olvidaste tu contraseña?</a>
+            <a href="#" onclick="showResetForm()" class="text-muted">¿Olvidaste tu contraseña?</a>
             </div>
             <div class="d-flex justify-content-center">
                 <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
             </div>
             <div class="mt-3 text-center">
-                <a href="crear_cuenta.php" class="text-muted">¿No tienes cuenta? Crea una ahora</a>
+            <a href="#" onclick="showRegisterForm()" class="text-muted">¿No tienes cuenta? Crea una ahora</a>
             </div>
         </form>
     </div>
 </div>
 <?php endif; ?>
     <!-- Aquí termina el Contenedor del formulario de inicio de sesión -->
+    <!--  aqui inicia el Formulario de Registro de Usuario -->
+    <?php if (!isset($_SESSION['user_name'])): ?>
+<div class="register-overlay" id="registerFormContainer" style="display: <?php echo isset($_SESSION['error_register']) ? 'flex' : 'none'; ?>;">
+    <div class="register-form-container">
+        <button class="close-btn" id="closeRegisterBtn">&times;</button>
+        <h2>Crear Cuenta</h2>
+
+        <!-- Mostrar mensaje de error si existe -->
+        <?php if (isset($_SESSION['error_register'])): ?>
+            <div id="errorRegisterMessage" class="alert alert-danger">
+                <?php echo htmlspecialchars($_SESSION['error_register']); ?>
+                <?php unset($_SESSION['error_register']); // Limpiar el mensaje de error ?>
+            </div>
+        <?php endif; ?>
+
+        <form id="registerForm" action="procesar_registro.php" method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label">Nombre Completo</label>
+                <input type="text" class="form-control" id="name" name="name" required value="<?php echo isset($_SESSION['form_data']['name']) ? htmlspecialchars($_SESSION['form_data']['name']) : ''; ?>">
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <input type="email" class="form-control" id="registerEmail" name="email" required value="<?php echo isset($_SESSION['form_data']['email']) ? htmlspecialchars($_SESSION['form_data']['email']) : ''; ?>">
+            </div>
+            <div class="mb-3">
+                <label for="direccion" class="form-label">Dirección</label>
+                <input type="text" class="form-control" id="registerDireccion" name="direccion" required value="<?php echo isset($_SESSION['form_data']['direccion']) ? htmlspecialchars($_SESSION['form_data']['direccion']) : ''; ?>">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="registerPassword" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+            </div>
+            <div class="mt-3 text-center">
+                <a href="#" onclick="showLoginForm()" class="text-muted">¿Ya tienes cuenta? Inicia sesión</a>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
+<!-- aqui termina el Formulario de Registro de Usuario -->
+<!-- Formulario para Restablecer Contraseña -->
+<?php if (!isset($_SESSION['user_name'])): ?>
+<div class="reset-overlay" id="resetFormContainer">
+    <div class="reset-form-container">
+        <button class="close-btn" id="closeResetBtn">&times;</button>
+        <h2>Restablecer Contraseña</h2>
+
+        <!-- Mostrar mensaje de error si existe -->
+        <?php if (isset($_GET['error_reset'])): ?>
+            <div id="errorResetMessage" class="alert alert-danger">
+                <?php echo htmlspecialchars($_GET['error_reset']); ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Mostrar mensaje de éxito si existe -->
+        <?php if (isset($_GET['success_reset'])): ?>
+            <div id="successResetMessage" class="alert alert-success">
+                <?php echo htmlspecialchars($_GET['success_reset']); ?>
+            </div>
+        <?php endif; ?>
+
+        <form id="resetForm" action="procesar_reset.php" method="POST">
+            <div class="mb-3">
+                <label for="resetEmail" class="form-label">Correo Electrónico</label>
+                <input type="email" class="form-control" id="resetEmail" name="email" required>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">Enviar enlace de restablecimiento</button>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
+<!-- aqui termina el Formulario de olvido su contraseña -->
     <div class="row mt-3">
         <div class="col-12 nav-container">
             <!-- Contenedor de los botones -->
@@ -247,6 +337,122 @@ function removeErrorParam() {
 
 // Ocultar el contenedor del formulario
 document.getElementById("loginFormContainer").style.display = "none";
+
+// aqui inicia la funcion del formulario de registro
+
+// Función para mostrar el formulario de registro
+function showRegisterForm() {
+    document.getElementById('registerFormContainer').style.display = 'flex';
+}
+
+
+// Función para limpiar los campos del formulario de registro
+//function clearRegisterFormFields() {
+  //  document.getElementById("registerForm").reset();
+//}
+
+
+function clearRegisterFormFields() {
+    console.log("Limpiando campos del formulario");
+    document.getElementById("registerForm").reset();
+}
+
+document.getElementById("closeRegisterBtn").addEventListener("click", function() {
+    console.log("Formulario cerrado");
+    document.getElementById("registerFormContainer").style.display = "none";
+    removeRegisterErrorParam(); // Limpiar el parámetro 'error_register'
+
+    // Ocultar el mensaje de error
+    const errorRegisterMsg = document.getElementById("errorRegisterMessage");
+    if (errorRegisterMsg) {
+        errorRegisterMsg.style.display = "none";
+    }
+
+    // Limpiar los campos del formulario
+    clearRegisterFormFields();
+});
+
+
+
+// Mantén el formulario abierto si hay un error en la URL
+window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error_register')) {
+        showRegisterForm();
+        removeRegisterErrorParam(); // Limpiar el parámetro 'error_register' después de mostrar el formulario
+    }
+};
+
+// Función para limpiar el parámetro 'error_register' de la URL
+function removeRegisterErrorParam() {
+    const url = new URL(window.location);
+    url.searchParams.delete('error_register');
+    window.history.replaceState({}, document.title, url);
+}
+
+// Asegúrate de que el formulario esté oculto si no hay errores
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.has('error_register')) {
+        document.getElementById("registerFormContainer").style.display = "none";
+    }
+});
+///////////////////////////////////////////////////////////////////////////////////////
+
+
+// aqui inician la Función para  el formulario de restablecimiento de contraseña
+// Función para mostrar el formulario de restablecimiento de contraseña
+function showResetForm() {
+    document.getElementById('resetFormContainer').style.display = 'flex';
+}
+
+// Función para cerrar el formulario de restablecimiento de contraseña
+document.getElementById("closeResetBtn").addEventListener("click", function() {
+    document.getElementById("resetFormContainer").style.display = "none";
+    removeResetErrorParam(); // Limpiar el parámetro 'error_reset'
+    removeResetSuccessParam(); // Limpiar el parámetro 'success_reset'
+    
+    // Limpiar los campos del formulario
+    clearResetFormFields();
+});
+
+// Función para limpiar los campos del formulario de restablecimiento de contraseña
+function clearResetFormFields() {
+    document.getElementById("resetForm").reset();
+}
+
+// Mantén el formulario abierto si hay un error o un mensaje de éxito en la URL
+window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error_reset')) {
+        showResetForm();
+        removeResetErrorParam(); // Limpiar el parámetro 'error_reset' después de mostrar el formulario
+    }
+    if (urlParams.has('success_reset')) {
+        showResetForm();
+        removeResetSuccessParam(); // Limpiar el parámetro 'success_reset' después de mostrar el formulario
+    }
+};
+
+// Función para limpiar el parámetro 'error_reset' de la URL
+function removeResetErrorParam() {
+    const url = new URL(window.location);
+    url.searchParams.delete('error_reset');
+    window.history.replaceState({}, document.title, url);
+}
+
+// Función para limpiar el parámetro 'success_reset' de la URL
+function removeResetSuccessParam() {
+    const url = new URL(window.location);
+    url.searchParams.delete('success_reset');
+    window.history.replaceState({}, document.title, url);
+}
+
+// Ocultar el contenedor del formulario de restablecimiento de contraseña
+document.getElementById("resetFormContainer").style.display = "none";
+
+
+
 
 
 </script>

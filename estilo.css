@@ -293,8 +293,96 @@ body {
 }
 
 /* aqui termina los estilos para el formulario*/
+/* aqui inicia  los estilos para el formulario de crear cuenta */
+/* Superposición transparente para el formulario de registro */
+.register-overlay {
+    position: fixed;
+    top: 160px; /* Ajusta según la altura del navbar */
+    right: 0; /* Alinea el contenedor a la derecha */
+    width: 35%; /* Ancho */
+    height: 73%; /* Alto */
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo negro con transparencia */
+    display: flex; /* Cambiado de none a flex */
+    justify-content: center; /* Centra el formulario horizontalmente */
+    align-items: center;
+    z-index: 1000; /* Asegúrate de que esté por encima de otros elementos */
+}
 
-/* aqui termina los estilos para el formulario*/
+/* Contenedor del formulario */
+.register-form-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+    max-height: 98%; /* Asegura que el contenedor del formulario no se salga de la superposición */
+    margin-right: 20px; /* Ajusta la separación del formulario respecto al borde derecho */
+}
 
+/* Botón de cierre */
+#closeRegisterBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    border: none;
+    font-size: 36px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #440cdf;
+}
 
+#closeRegisterBtn:hover {
+    color: #ff0000; /* Cambia el color al pasar el mouse */
+}
 
+/* aqui termina los estilos para el formulario de crear cuenta*/
+
+/* a qui inicia los Estilos para el formulario de restablecimiento de contraseña */
+/* Estilos para el formulario de restablecimiento de contraseña */
+.reset-overlay {
+    position: fixed;
+    top: 160px; /* Ajusta según la altura del navbar */
+    right: 0; /* Alinea el contenedor a la derecha */
+    width: 35%; /* Ancho */
+    height: 73%; /* Alto */
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo negro con transparencia */
+    display: none; /* Cambiar a flex cuando se muestre */
+    justify-content: center; /* Centra el formulario horizontalmente */
+    align-items: center;
+    z-index: 1000; /* Asegúrate de que esté por encima de otros elementos */
+}
+
+/* Contenedor del formulario */
+.reset-form-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+    max-height: 98%; /* Asegura que el contenedor del formulario no se salga de la superposición */
+    margin-right: 20px; /* Ajusta la separación del formulario respecto al borde derecho */
+}
+
+/* Botón de cierre */
+#closeResetBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    border: none;
+    font-size: 36px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #440cdf;
+}
+
+#closeResetBtn:hover {
+    color: #ff0000; /* Cambia el color al pasar el mouse */
+}
+
+/* aqui termina Estilos para el formulario de restablecimiento de contraseña */
