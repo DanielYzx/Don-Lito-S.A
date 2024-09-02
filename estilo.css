@@ -250,10 +250,10 @@ body {
 /* Superposición transparente */
 .login-overlay {
     position: fixed;
-    top: 160px; /* Ajusta según la altura del navbar */
+    top: 110px; /* Ajusta según la altura del navbar */
     right: 0; /* Alinea el contenedor a la derecha */
     width: 35%;/* Ancho */
-    height: 73%;/* Alto */
+    height: 82%;/* Alto */
     border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.5); /* Fondo negro con transparencia */
     display: flex; /* Cambiado de none a flex */
@@ -297,10 +297,10 @@ body {
 /* Superposición transparente para el formulario de registro */
 .register-overlay {
     position: fixed;
-    top: 160px; /* Ajusta según la altura del navbar */
+    top: 110px; /* Ajusta según la altura del navbar */
     right: 0; /* Alinea el contenedor a la derecha */
     width: 35%; /* Ancho */
-    height: 73%; /* Alto */
+    height: 82%; /* Alto */
     border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.5); /* Fondo negro con transparencia */
     display: flex; /* Cambiado de none a flex */
@@ -319,7 +319,16 @@ body {
     max-width: 400px;
     max-height: 98%; /* Asegura que el contenedor del formulario no se salga de la superposición */
     margin-right: 20px; /* Ajusta la separación del formulario respecto al borde derecho */
+    overflow-y: auto; /* Habilita el scroll interno si el contenido del formulario excede la altura */
+
+
+    
 }
+
+.register-form-container::-webkit-scrollbar {
+    display: none;  /* Oculta el scroll en Chrome, Safari y Edge */
+}
+
 
 /* Botón de cierre */
 #closeRegisterBtn {

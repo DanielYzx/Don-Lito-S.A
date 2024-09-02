@@ -3,14 +3,6 @@
 session_start();
 ?>
 
-<?php
-// Agrega este código antes del HTML del formulario
-if (isset($_SESSION['form_data'])) {
-    echo "<pre>";
-    print_r($_SESSION['form_data']); // Imprime los datos del formulario en la página
-    echo "</pre>";
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -279,16 +271,15 @@ if ($result->num_rows > 0) {
     <script src="js/bootstrap.bundle.min.js"></script>
    <script src="scroll.js"></script>    
    <script>
- // Función para mostrar el formulario
+ // Funciones relacionadas con el formulario de login
 function showLoginForm() {
     document.getElementById('loginFormContainer').style.display = 'flex';
 }
 
-// Función para cerrar el formulario
 document.getElementById("closeBtn").addEventListener("click", function() {
     document.getElementById("loginFormContainer").style.display = "none";
-    removeErrorParam(); // Limpiar el parámetro 'error'
-
+    removeErrorParam();
+    clearLoginFormFields();
 
     // Ocultar el mensaje de error
     const errorMsg = document.getElementById("errorMessage");
@@ -297,159 +288,95 @@ document.getElementById("closeBtn").addEventListener("click", function() {
 
     }
 
-    // Limpiar los campos del formulario
-    clearFormFields();
-    
-
 });
 
-// Función para limpiar los campos del formulario
-function clearFormFields() {
+function clearLoginFormFields() {
     document.getElementById("loginForm").reset();
 }
 
-// Cerrar el formulario si se hace clic fuera de él
-window.onclick = function(event) {
-    var loginFormContainer = document.getElementById('loginFormContainer');
-    if (event.target == loginFormContainer) {
-        loginFormContainer.style.display = 'none';
-        removeErrorParam(); // Limpiar el parámetro 'error' al cerrar haciendo clic fuera
-    }
-
-
-};
-
-// Mantén el formulario abierto si hay un error en la URL
-window.onload = function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('error')) {
-        showLoginForm();
-        removeErrorParam(); // Limpiar el parámetro 'error' después de mostrar el formulario
-    }
-};
-
-// Función para limpiar el parámetro 'error' de la URL
 function removeErrorParam() {
     const url = new URL(window.location);
     url.searchParams.delete('error');
     window.history.replaceState({}, document.title, url);
 }
 
-// Ocultar el contenedor del formulario
-document.getElementById("loginFormContainer").style.display = "none";
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error')) {
+        showLoginForm();
+        removeErrorParam();
+    } else {
+        document.getElementById("loginFormContainer").style.display = "none";
+    }
+});
 
-// aqui inicia la funcion del formulario de registro
-
-// Función para mostrar el formulario de registro
+// Funciones relacionadas con el formulario de registro
 function showRegisterForm() {
     document.getElementById('registerFormContainer').style.display = 'flex';
 }
 
-
-// Función para limpiar los campos del formulario de registro
-//function clearRegisterFormFields() {
-  //  document.getElementById("registerForm").reset();
-//}
-
-
-function clearRegisterFormFields() {
-    console.log("Limpiando campos del formulario");
-    document.getElementById("registerForm").reset();
-}
-
 document.getElementById("closeRegisterBtn").addEventListener("click", function() {
-    console.log("Formulario cerrado");
     document.getElementById("registerFormContainer").style.display = "none";
-    removeRegisterErrorParam(); // Limpiar el parámetro 'error_register'
-
-    // Ocultar el mensaje de error
-    const errorRegisterMsg = document.getElementById("errorRegisterMessage");
+    removeRegisterErrorParam();
+  // Ocultar el mensaje de error
+   const errorRegisterMsg = document.getElementById("errorRegisterMessage");
     if (errorRegisterMsg) {
         errorRegisterMsg.style.display = "none";
     }
 
-    // Limpiar los campos del formulario
     clearRegisterFormFields();
 });
 
+function clearRegisterFormFields() {
+    document.getElementById("registerForm").reset();
+}
 
-
-// Mantén el formulario abierto si hay un error en la URL
-window.onload = function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('error_register')) {
-        showRegisterForm();
-        removeRegisterErrorParam(); // Limpiar el parámetro 'error_register' después de mostrar el formulario
-    }
-};
-
-// Función para limpiar el parámetro 'error_register' de la URL
 function removeRegisterErrorParam() {
     const url = new URL(window.location);
     url.searchParams.delete('error_register');
     window.history.replaceState({}, document.title, url);
 }
 
-// Asegúrate de que el formulario esté oculto si no hay errores
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
-    if (!urlParams.has('error_register')) {
+    if (urlParams.has('error_register')) {
+        showRegisterForm();
+        removeRegisterErrorParam();
+    } else {
         document.getElementById("registerFormContainer").style.display = "none";
     }
 });
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 
+// Función para mostrar el formulario de registro y cerrar el de login si está abierto
+function showRegisterForm() {
+    // Mostrar el formulario de registro
+    document.getElementById('registerFormContainer').style.display = 'flex';
 
-// aqui inician la Función para  el formulario de restablecimiento de contraseña
-// Función para mostrar el formulario de restablecimiento de contraseña
-function showResetForm() {
-    document.getElementById('resetFormContainer').style.display = 'flex';
-}
-
-// Función para cerrar el formulario de restablecimiento de contraseña
-document.getElementById("closeResetBtn").addEventListener("click", function() {
-    document.getElementById("resetFormContainer").style.display = "none";
-    removeResetErrorParam(); // Limpiar el parámetro 'error_reset'
-    removeResetSuccessParam(); // Limpiar el parámetro 'success_reset'
-    
-    // Limpiar los campos del formulario
-    clearResetFormFields();
-});
-
-// Función para limpiar los campos del formulario de restablecimiento de contraseña
-function clearResetFormFields() {
-    document.getElementById("resetForm").reset();
-}
-
-// Mantén el formulario abierto si hay un error o un mensaje de éxito en la URL
-window.onload = function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('error_reset')) {
-        showResetForm();
-        removeResetErrorParam(); // Limpiar el parámetro 'error_reset' después de mostrar el formulario
+    // Cerrar el formulario de inicio de sesión si está abierto
+    const loginFormContainer = document.getElementById('loginFormContainer');
+    if (loginFormContainer.style.display === 'flex') {
+        loginFormContainer.style.display = 'none';
+        clearFormFields();  // Limpiar los campos del formulario de login
+        removeErrorParam(); // Limpiar el parámetro 'error' si existe
     }
-    if (urlParams.has('success_reset')) {
-        showResetForm();
-        removeResetSuccessParam(); // Limpiar el parámetro 'success_reset' después de mostrar el formulario
+}
+
+// Función para mostrar el formulario de inicio de sesión y cerrar el de registro si está abierto
+function showLoginForm() {
+    // Mostrar el formulario de inicio de sesión
+    document.getElementById('loginFormContainer').style.display = 'flex';
+
+    // Cerrar el formulario de registro si está abierto
+    const registerFormContainer = document.getElementById('registerFormContainer');
+    if (registerFormContainer.style.display === 'flex') {
+        registerFormContainer.style.display = 'none';
+        clearRegisterFormFields();  // Limpiar los campos del formulario de registro
+        removeRegisterErrorParam(); // Limpiar el parámetro 'error_register' si existe
     }
-};
-
-// Función para limpiar el parámetro 'error_reset' de la URL
-function removeResetErrorParam() {
-    const url = new URL(window.location);
-    url.searchParams.delete('error_reset');
-    window.history.replaceState({}, document.title, url);
 }
-
-// Función para limpiar el parámetro 'success_reset' de la URL
-function removeResetSuccessParam() {
-    const url = new URL(window.location);
-    url.searchParams.delete('success_reset');
-    window.history.replaceState({}, document.title, url);
-}
-
-// Ocultar el contenedor del formulario de restablecimiento de contraseña
-document.getElementById("resetFormContainer").style.display = "none";
 
 
 
