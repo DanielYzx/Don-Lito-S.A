@@ -135,6 +135,7 @@ session_start();
 <?php endif; ?>
 <!-- aqui termina el Formulario de Registro de Usuario -->
 <!-- Formulario para Restablecer Contraseña -->
+<!-- Formulario para Restablecer Contraseña -->
 <?php if (!isset($_SESSION['user_name'])): ?>
 <div class="reset-overlay" id="resetFormContainer">
     <div class="reset-form-container">
@@ -155,13 +156,42 @@ session_start();
             </div>
         <?php endif; ?>
 
+        <!-- Paso 1: Ingresar correo -->
+      
         <form id="resetForm" action="procesar_reset.php" method="POST">
+
             <div class="mb-3">
                 <label for="resetEmail" class="form-label">Correo Electrónico</label>
                 <input type="email" class="form-control" id="resetEmail" name="email" required>
             </div>
             <div class="d-flex justify-content-center">
                 <button type="submit" class="btn btn-primary">Enviar enlace de restablecimiento</button>
+            </div>
+        </form>
+
+        <!-- Paso 2: Ingresar código de validación (oculto inicialmente) -->
+        <form id="validationForm" action="validar_codigo.php" method="POST" style="display:none; margin-top: 20px;">
+            <div class="mb-3">
+                <label for="validationCode" class="form-label">Código de Validación</label>
+                <input type="text" class="form-control" id="validationCode" name="validation_code" required>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">Validar Código</button>
+            </div>
+        </form>
+
+        <!-- Paso 3: Ingresar nueva contraseña (oculto inicialmente) -->
+        <form id="newPasswordForm" action="procesar_nueva_contrasena.php" method="POST" style="display:none; margin-top: 20px;">
+            <div class="mb-3">
+                <label for="newPassword" class="form-label">Nueva Contraseña</label>
+                <input type="password" class="form-control" id="newPassword" name="new_password" required>
+            </div>
+            <div class="mb-3">
+                <label for="confirmNewPassword" class="form-label">Confirmar Nueva Contraseña</label>
+                <input type="password" class="form-control" id="confirmNewPassword" name="confirm_new_password" required>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
             </div>
         </form>
     </div>
@@ -377,9 +407,80 @@ function showLoginForm() {
         removeRegisterErrorParam(); // Limpiar el parámetro 'error_register' si existe
     }
 }
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// aqui inician la Función para  el formulario de restablecimiento de contraseña
+// Funciones relacionadas con el formulario de restablecimiento de contraseña
+function showResetForm() {
+    document.getElementById('resetFormContainer').style.display = 'flex';
+    closeLoginForm();  // Cierra el formulario de inicio de sesión si está abierto
+}
 
+document.getElementById("closeResetBtn").addEventListener("click", function() {
+    document.getElementById("resetFormContainer").style.display = "none";
+    removeResetErrorParam();
+    removeResetSuccessParam();
+    clearResetFormFields();
+});
 
+function clearResetFormFields() {
+    document.getElementById("resetForm").reset();
+}
 
+function removeResetErrorParam() {
+    const url = new URL(window.location);
+    url.searchParams.delete('error_reset');
+    window.history.replaceState({}, document.title, url);
+}
+
+function removeResetSuccessParam() {
+    const url = new URL(window.location);
+    url.searchParams.delete('success_reset');
+    window.history.replaceState({}, document.title, url);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error_reset')) {
+        showResetForm();
+        removeResetErrorParam();
+    } else if (urlParams.has('success_reset')) {
+        showResetForm();
+        removeResetSuccessParam();
+    } else {
+        document.getElementById("resetFormContainer").style.display = "none";
+    }
+});
+
+// Función para cerrar el formulario de inicio de sesión
+function closeLoginForm() {
+    document.getElementById("loginFormContainer").style.display = "none";
+}
+
+// Función para cerrar el formulario de restablecimiento de contraseña
+function closeResetForm() {
+    document.getElementById("resetFormContainer").style.display = "none";
+
+}
+ 
+////////////////////////////////////////////////////////////////////////////////
+// Mostrar el formulario de validación de código después de enviar el correo
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('success_reset')) {
+        document.getElementById("resetForm").style.display = "none";
+        document.getElementById("validationForm").style.display = "block";
+    }
+    if (urlParams.has('show_new_password')) {
+        document.getElementById("validationForm").style.display = "none";
+        document.getElementById("newPasswordForm").style.display = "block";
+    }
+});
+
+function showResetForm() {
+    document.getElementById('resetFormContainer').style.display = 'flex';
+    document.getElementById('loginFormContainer').style.display = 'none';
+    // Ocultar cualquier otro formulario abierto
+}
 
 
 </script>

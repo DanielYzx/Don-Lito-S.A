@@ -20,6 +20,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
 
+    // Verificar si el correo electrónico ya está registrado
+    $sql = "SELECT id FROM usuarios WHERE correo = ?";
+    $stmt = $conexion->prepare($sql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        $_SESSION['form_data'] = $_POST;  // Guardar los datos del formulario para repoblación
+        $_SESSION['error_register'] = 'El correo electrónico ya está registrado';
+        header("Location: index.php?error_register=" . urlencode($_SESSION['error_register']));
+        exit();
+    }
+
+    $stmt->close();
+
     // Encriptar la contraseña
     $password_hash = password_hash($password, PASSWORD_BCRYPT);
 
