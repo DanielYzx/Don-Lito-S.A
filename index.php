@@ -158,7 +158,7 @@ session_start();
 
         <!-- Paso 1: Ingresar correo -->
       
-        <form id="resetForm" action="procesar_reset.php" method="POST">
+        <form id="resetForm" action="procesar_reset_local.php" method="POST">
 
             <div class="mb-3">
                 <label for="resetEmail" class="form-label">Correo Electrónico</label>

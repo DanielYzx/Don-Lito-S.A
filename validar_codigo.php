@@ -1,25 +1,22 @@
 <?php
-// validar_codigo.php
 session_start();
-include 'conexion.php';
+include 'conexion.php'; // Asegúrate de tener una conexión a la base de datos
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $token = $conexion->real_escape_string($_POST['validation_code']);
-    $sql = "SELECT id FROM usuarios WHERE reset_token = '$token' AND token_expiry > NOW()";
-    $result = $conexion->query($sql);
+    $email = $_POST['email'];
+    $validation_code = $_POST['validation_code'];
 
-    if ($result->num_rows > 0) {
-        // Código válido, muestra el formulario para cambiar la contraseña
-        header("Location: olvido_contrasena.php?token=$token&show_new_password=1");
-        exit();
+    // Verifica el token en la base de datos
+    $stmt = $conexion->prepare("SELECT reset_token, reset_token_expiry FROM usuarios WHERE correo = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+
+    if ($user && $user['reset_token'] === $validation_code && $user['reset_token_expiry'] > date('Y-m-d H:i:s')) {
+        header('Location: index.php?show_new_password=true');
     } else {
-        header("Location: olvido_contrasena.php?error_reset=Código inválido o expirado.");
-        exit();
+        header('Location: index.php?error_reset=Código de validación incorrecto o expirado.');
     }
-} else {
-    header("Location: index.php");
-    exit();
 }
-
-$conexion->close();
 ?>

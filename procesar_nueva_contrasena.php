@@ -1,24 +1,24 @@
 <?php
-// procesar_nueva_contrasena.php
 session_start();
-include 'conexion.php';
+include 'conexion.php'; // Asegúrate de tener una conexión a la base de datos
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $token = $conexion->real_escape_string($_POST['token']);
-    $newPassword = password_hash($conexion->real_escape_string($_POST['new_password']), PASSWORD_DEFAULT);
-    $sql = "UPDATE usuarios SET contraseña = '$newPassword', reset_token = NULL, token_expiry = NULL WHERE reset_token = '$token'";
+    $email = $_POST['email']; // Asegúrate de pasar el email en el formulario de nueva contraseña
+    $new_password = $_POST['new_password'];
+    $confirm_new_password = $_POST['confirm_new_password'];
 
-    if ($conexion->query($sql) === TRUE) {
-        header("Location: index.php?success_reset=Contraseña cambiada exitosamente.");
-        exit();
+    if ($new_password === $confirm_new_password) {
+        // Hashear la nueva contraseña
+        $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
+
+        // Actualiza la contraseña en la base de datos
+        $stmt = $conexion->prepare("UPDATE usuarios SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE correo = ?");
+        $stmt->bind_param("ss", $hashed_password, $email);
+        $stmt->execute();
+
+        header('Location: index.php?success_reset=Contraseña actualizada correctamente.');
     } else {
-        header("Location: olvido_contrasena.php?error_reset=Ocurrió un error al cambiar tu contraseña.");
-        exit();
+        header('Location: index.php?error_reset=Las contraseñas no coinciden.');
     }
-} else {
-    header("Location: index.php");
-    exit();
 }
-
-$conexion->close();
 ?>
