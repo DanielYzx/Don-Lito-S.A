@@ -1,43 +1,63 @@
 <?php
 session_start();
-require 'PHPMailer/PHPMailerAutoload.php';
 include 'conexion.php'; // Asegúrate de tener una conexión a la base de datos
+// Verifica si se debe mostrar el formulario de validación de código
+// Incluir PHPMailer
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+require 'C:\xampp\htdocs\Don-Lito-S.A\PHPMailer\src\Exception.php';
+require 'C:\xampp\htdocs\Don-Lito-S.A\PHPMailer\src\PHPMailer.php';
+require 'C:\xampp\htdocs\Don-Lito-S.A\PHPMailer\src\SMTP.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
     $email = $_POST['email'];
 
-    // Verifica si el correo electrónico existe en la base de datos
+    // Verificar si el correo existe
     $stmt = $conexion->prepare("SELECT id FROM usuarios WHERE correo = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        $token = bin2hex(random_bytes(4)); // Genera un token aleatorio
+        // Generar token y actualizar en la base de datos
+        $token = bin2hex(random_bytes(2));
+        $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-        // Guarda el token en la base de datos con un timestamp
-        $stmt = $conexion->prepare("UPDATE usuarios SET reset_token = ?, reset_token_expiry = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE correo = ?");
-        $stmt->bind_param("ss", $token, $email);
+        $stmt = $conexion->prepare("UPDATE usuarios SET reset_token = ?, reset_token_expiry = ? WHERE correo = ?");
+        $stmt->bind_param("sss", $token, $expiry, $email);
         $stmt->execute();
 
-        // Enviar correo con el token
-        $mail = new PHPMailer;
-        $mail->isSMTP();
-        $mail->Host = 'localhost'; // Configura MailHog
-        $mail->Port = 1025; // Puerto de MailHog
-        $mail->setFrom('noreply@example.com', 'Tu Aplicación');
-        $mail->addAddress($email);
-        $mail->Subject = 'Enlace de Restablecimiento de Contraseña';
-        $mail->Body = 'Haz clic en el siguiente enlace para restablecer tu contraseña: 
-        http://localhost/tu_proyecto/index.php?show_new_password=true';
+        // Enviar el correo con PHPMailer
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = 'localhost';
+            $mail->SMTPAuth = false;
+            $mail->Port = 1025;
 
-        if ($mail->send()) {
-            header('Location: index.php?success_reset=Se ha enviado un enlace a tu correo electrónico.');
-        } else {
-            header('Location: index.php?error_reset=Hubo un problema al enviar el correo.');
+            $mail->setFrom('no-reply@tu-dominio.com', 'Tu Sitio Web');
+            $mail->addAddress($email);
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Restablecer Contraseña';
+            $mail->Body = "Tu código de restablecimiento es: $token";
+
+            $mail->send();
+            
+            // Guardar email en sesión
+            $_SESSION['email'] = $email;
+            
+            // Redirigir al formulario de validación de código
+            header("Location: index.php?show_validation_code=true");
+            exit();
+        } catch (Exception $e) {
+            header("Location: index.php?error_reset=No se pudo enviar el correo.");
+            exit();
         }
     } else {
-        header('Location: index.php?error_reset=El correo electrónico no está registrado.');
+        header("Location: index.php?error_reset=El correo no está registrado.");
+        exit();
     }
 }
 ?>

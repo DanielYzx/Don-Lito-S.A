@@ -1,6 +1,9 @@
 <?php
 // Inicia la sesión
 session_start();
+$showValidationForm = isset($_GET['show_validation_code']) && $_GET['show_validation_code'] === 'true';
+
+
 ?>
 
 <!DOCTYPE html>
@@ -140,7 +143,7 @@ session_start();
 <div class="reset-overlay" id="resetFormContainer">
     <div class="reset-form-container">
         <button class="close-btn" id="closeResetBtn">&times;</button>
-        <h2>Restablecer Contraseña</h2>
+        <h2>Restablecer Contraseñoa</h2>
 
         <!-- Mostrar mensaje de error si existe -->
         <?php if (isset($_GET['error_reset'])): ?>
@@ -466,10 +469,14 @@ function closeResetForm() {
 // Mostrar el formulario de validación de código después de enviar el correo
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('success_reset')) {
+    
+    // Mostrar formulario de validación si el correo fue enviado exitosamente
+    if (urlParams.has('show_validation_code')) {
         document.getElementById("resetForm").style.display = "none";
         document.getElementById("validationForm").style.display = "block";
     }
+
+    // Mostrar formulario de nueva contraseña si el código fue validado
     if (urlParams.has('show_new_password')) {
         document.getElementById("validationForm").style.display = "none";
         document.getElementById("newPasswordForm").style.display = "block";

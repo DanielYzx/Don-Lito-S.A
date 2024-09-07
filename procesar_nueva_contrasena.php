@@ -12,12 +12,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
 
         // Actualiza la contraseña en la base de datos
-        $stmt = $conexion->prepare("UPDATE usuarios SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE correo = ?");
+        $stmt = $conexion->prepare("UPDATE usuarios SET contraseña = ?, reset_token = NULL, reset_token_expiry = NULL WHERE correo = ?");
         $stmt->bind_param("ss", $hashed_password, $email);
-        $stmt->execute();
 
-        header('Location: index.php?success_reset=Contraseña actualizada correctamente.');
+        if ($stmt->execute()) {
+            // Si la actualización fue exitosa
+            header('Location: index.php?success_reset=Contraseña actualizada correctamente.');
+        } else {
+            // Error al ejecutar la actualización
+            header('Location: index.php?error_reset=Error al actualizar la contraseña.');
+        }
+        $stmt->close();
     } else {
+        // Las contraseñas no coinciden
         header('Location: index.php?error_reset=Las contraseñas no coinciden.');
     }
 }
