@@ -1,7 +1,7 @@
 <?php
 // Inicia la sesión
 session_start();
-$showValidationForm = isset($_GET['show_validation_code']) && $_GET['show_validation_code'] === 'true';
+
 
 
 ?>
@@ -143,7 +143,7 @@ $showValidationForm = isset($_GET['show_validation_code']) && $_GET['show_valida
 <div class="reset-overlay" id="resetFormContainer">
     <div class="reset-form-container">
         <button class="close-btn" id="closeResetBtn">&times;</button>
-        <h2>Restablecer Contraseñoa</h2>
+        <h2>Restablecer Contraseña</h2>
 
         <!-- Mostrar mensaje de error si existe -->
         <?php if (isset($_GET['error_reset'])): ?>
@@ -161,19 +161,19 @@ $showValidationForm = isset($_GET['show_validation_code']) && $_GET['show_valida
 
         <!-- Paso 1: Ingresar correo -->
       
-        <form id="resetForm" action="procesar_reset_local.php" method="POST">
+        <form id="resetForm" action="procesar_reset_local.php" method="POST" style="display: <?php echo isset($_GET['show_reset_form']) ? 'block' : 'none'; ?>;">
 
             <div class="mb-3">
                 <label for="resetEmail" class="form-label">Correo Electrónico</label>
                 <input type="email" class="form-control" id="resetEmail" name="email" required>
             </div>
             <div class="d-flex justify-content-center">
-                <button type="submit" class="btn btn-primary">Enviar enlace de restablecimiento</button>
+                <button type="submit" class="btn btn-primary">Obtener Código de Restablecimiento</button>
             </div>
         </form>
 
         <!-- Paso 2: Ingresar código de validación (oculto inicialmente) -->
-        <form id="validationForm" action="validar_codigo.php" method="POST" style="display:none; margin-top: 20px;">
+        <form id="validationForm" action="validar_codigo.php" method="POST" style="display: <?php echo isset($_GET['show_validation_code']) ? 'block' : 'none'; ?>;">
             <div class="mb-3">
                 <label for="validationCode" class="form-label">Código de Validación</label>
                 <input type="text" class="form-control" id="validationCode" name="validation_code" required>
@@ -184,19 +184,21 @@ $showValidationForm = isset($_GET['show_validation_code']) && $_GET['show_valida
         </form>
 
         <!-- Paso 3: Ingresar nueva contraseña (oculto inicialmente) -->
-        <form id="newPasswordForm" action="procesar_nueva_contrasena.php" method="POST" style="display:none; margin-top: 20px;">
-            <div class="mb-3">
-                <label for="newPassword" class="form-label">Nueva Contraseña</label>
-                <input type="password" class="form-control" id="newPassword" name="new_password" required>
-            </div>
-            <div class="mb-3">
-                <label for="confirmNewPassword" class="form-label">Confirmar Nueva Contraseña</label>
-                <input type="password" class="form-control" id="confirmNewPassword" name="confirm_new_password" required>
-            </div>
-            <div class="d-flex justify-content-center">
-                <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
-            </div>
-        </form>
+        <form id="newPasswordForm" action="procesar_nueva_contrasena.php" method="POST" style="display: <?php echo isset($_GET['show_new_password_form']) ? 'block' : 'none'; ?>;">
+   <!-- Campo de email oculto -->
+<input type="hidden" name="email" value="<?php echo isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : ''; ?>">
+    <div class="mb-3">
+        <label for="newPassword" class="form-label">Nueva Contraseña</label>
+        <input type="password" class="form-control" id="newPassword" name="new_password" required>
+    </div>
+    <div class="mb-3">
+        <label for="confirmNewPassword" class="form-label">Confirmar Nueva Contraseña</label>
+        <input type="password" class="form-control" id="confirmNewPassword" name="confirm_new_password" required>
+    </div>
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+    </div>
+</form>
     </div>
 </div>
 <?php endif; ?>
@@ -415,7 +417,21 @@ function showLoginForm() {
 // Funciones relacionadas con el formulario de restablecimiento de contraseña
 function showResetForm() {
     document.getElementById('resetFormContainer').style.display = 'flex';
-    closeLoginForm();  // Cierra el formulario de inicio de sesión si está abierto
+
+    // Solo cierra el formulario de login si está abierto
+    closeLoginForm();
+    
+    // Aquí podrías manejar qué formulario mostrar, dependiendo del estado actual
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('show_validation_code')) {
+        document.getElementById("resetForm").style.display = "none";
+        document.getElementById("validationForm").style.display = "block";
+    } else if (urlParams.has('show_new_password')) {
+        document.getElementById("validationForm").style.display = "none";
+        document.getElementById("newPasswordForm").style.display = "block";
+    } else {
+        document.getElementById("resetForm").style.display = "block";
+    }
 }
 
 document.getElementById("closeResetBtn").addEventListener("click", function() {
@@ -465,29 +481,34 @@ function closeResetForm() {
 
 }
  
-////////////////////////////////////////////////////////////////////////////////
-// Mostrar el formulario de validación de código después de enviar el correo
+////////////////////////////////////////////////////////////////////////////
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
-    
-    // Mostrar formulario de validación si el correo fue enviado exitosamente
+
+    // Mostrar el formulario de validación de código si se envió el correo correctamente
     if (urlParams.has('show_validation_code')) {
+        // Mostrar el contenedor del formulario de restablecimiento
+        document.getElementById("resetFormContainer").style.display = "flex";
+        // Ocultar el formulario de ingreso de correo
         document.getElementById("resetForm").style.display = "none";
+        // Mostrar el formulario de validación de código
         document.getElementById("validationForm").style.display = "block";
     }
 
-    // Mostrar formulario de nueva contraseña si el código fue validado
+    // Mostrar el formulario de nueva contraseña si el código fue validado correctamente
     if (urlParams.has('show_new_password')) {
+        document.getElementById("resetFormContainer").style.display = "flex";
         document.getElementById("validationForm").style.display = "none";
         document.getElementById("newPasswordForm").style.display = "block";
     }
+
+    // Manejo de mensajes de error o éxito
+    if (urlParams.has('error_reset')) {
+        document.getElementById("resetFormContainer").style.display = "flex";
+        // Aquí podrías hacer que el mensaje de error sea visible, si no lo es.
+    }
 });
 
-function showResetForm() {
-    document.getElementById('resetFormContainer').style.display = 'flex';
-    document.getElementById('loginFormContainer').style.display = 'none';
-    // Ocultar cualquier otro formulario abierto
-}
 
 
 </script>
