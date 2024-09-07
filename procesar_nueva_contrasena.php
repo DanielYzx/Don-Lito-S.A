@@ -28,9 +28,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             // Las contraseñas no coinciden
             header('Location: index.php?error_reset=Las contraseñas no coinciden.');
+            //header("Location: index.php?show_new_password_form&error_reset=Las contraseñas no coinciden.");
         }
     } else {
         header('Location: index.php?error_reset=Datos faltantes.');
+        
     }
 }
 ?>

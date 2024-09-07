@@ -171,7 +171,6 @@ session_start();
                 <button type="submit" class="btn btn-primary">Obtener Código de Restablecimiento</button>
             </div>
         </form>
-
         <!-- Paso 2: Ingresar código de validación (oculto inicialmente) -->
         <form id="validationForm" action="validar_codigo.php" method="POST" style="display: <?php echo isset($_GET['show_validation_code']) ? 'block' : 'none'; ?>;">
             <div class="mb-3">
@@ -439,6 +438,17 @@ document.getElementById("closeResetBtn").addEventListener("click", function() {
     removeResetErrorParam();
     removeResetSuccessParam();
     clearResetFormFields();
+
+    // Ocultar el mensaje de error
+    const errorMsg = document.getElementById("errorResetMessage");
+    if (errorMsg) {
+        errorMsg.style.display = "none";
+
+    }
+
+    
+    window.location.href = 'index.php?show_reset_form=true';
+
 });
 
 function clearResetFormFields() {

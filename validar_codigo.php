@@ -17,7 +17,8 @@ if (isset($_POST['validation_code'])) {
         header("Location: index.php?show_new_password=true");
         exit();
     } else {
-        header("Location: index.php?error_reset=El código de validación es incorrecto o ha expirado.");
+       // header("Location: index.php?error_reset=El código de validación es incorrecto o ha expirado.");
+        header("Location: index.php?show_validation_code=true&error_reset=El código de validación es incorrecto o ha expirado.");
         exit();
     }
 }
