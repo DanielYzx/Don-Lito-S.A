@@ -20,6 +20,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($stmt->execute()) {
                 // Si la actualización fue exitosa
                 header('Location: index.php?success_reset=Contraseña actualizada correctamente.');
+                //header('Location: index.php?success_reset=Contraseña actualizada correctamente. Inicia sesión.');
+                exit();
             } else {
                 // Error al ejecutar la actualización
                 header('Location: index.php?error_reset=Error al actualizar la contraseña.');

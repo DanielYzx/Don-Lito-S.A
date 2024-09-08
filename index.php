@@ -60,6 +60,7 @@ session_start();
         <button class="close-btn" id="closeBtn">&times;</button>
         <h2>Iniciar Sesión</h2>
 
+
         <!-- Mostrar mensaje de error si existe -->
 <?php if (isset($_GET['error'])): ?>
     <div id="errorMessage" class="alert alert-danger" >
@@ -67,7 +68,7 @@ session_start();
     </div>
 <?php endif; ?>
 
-        <form id="loginForm" action="procesar_login.php" method="POST">
+        <form id="loginForm" action="procesar_login.php" method="POST"">
             <div class="mb-3">
                 <label for="email" class="form-label">Correo Electrónico</label>
                 <input type="email" class="form-control" id="email" name="email" required>
