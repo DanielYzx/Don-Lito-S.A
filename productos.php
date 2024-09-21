@@ -14,7 +14,7 @@ include 'conexion.php';
 $categoria_id = $_GET['categoria_id'];
 
 // Consulta para obtener los productos de la categoría seleccionada
-$sql = "SELECT nombre, precio, descripción, imagen FROM productos WHERE categoria_id = $categoria_id";
+$sql = "SELECT id, nombre, precio, descripción, imagen, cantidad_disponible FROM productos WHERE categoria_id = $categoria_id";
 $result = $conexion->query($sql);
 
 if ($result->num_rows > 0) {
@@ -29,11 +29,13 @@ if ($result->num_rows > 0) {
        echo '<h2 class="card-product-title">' . $producto["nombre"] . '</h2>';
        echo '<p class="card-product-price">Precio: $' . $producto["precio"] . '</p>';
        echo '<p class="card-product-description">' . $producto["descripción"] . '</p>';
+       echo '<p class="card-product-existencias">Existencias: ' . $producto["cantidad_disponible"] . '</p>';
+
        
        // Sección de cantidad
        echo '<div class="producto-cantidad">';
        echo '<button class="cantidad-btn restar">-</button>';
-       echo '<input type="number" value="1" min="1" class="cantidad-input">';
+       echo '<input type="number" value="1" min="1" class="cantidad-input" data-producto-id="' . $producto["id"] . '" data-disponible="' . $producto["cantidad_disponible"] . '">';
        echo '<button class="cantidad-btn sumar">+</button>';
        echo '</div>';
        
@@ -62,7 +64,6 @@ if ($result->num_rows > 0) {
 
 $conexion->close();
 ?>
-
 <script>
 // Inicializar la cantidad guardada
 let cantidadAnterior = {};
@@ -70,18 +71,27 @@ let cantidadAnterior = {};
 // Mostrar los botones de "Cancelar" y "Actualizar" al cambiar la cantidad manualmente o con los botones
 document.querySelectorAll('.cantidad-input').forEach(function(input) {
     input.addEventListener('input', function() {
-        const productoId = input.getAttribute('data-producto-id'); // Asumimos que cada input tiene un ID de producto
+        const productoId = input.getAttribute('data-producto-id');
 
-        // Si no hay una cantidad anterior registrada, guardarla
+        // Validar que el valor no sea menor que 1
+        if (parseInt(input.value) < 1) {
+            input.value = 1; // Establece el valor a 1 si es menor que 1
+        }
+
         if (!cantidadAnterior[productoId]) {
             cantidadAnterior[productoId] = input.value;
         }
 
-        // Mostrar los botones de opciones
         const opciones = this.parentNode.nextElementSibling;
         opciones.style.display = "flex";
+
+        // Deshabilitar el botón de agregar/eliminar
+        const botonCarrito = this.parentNode.nextElementSibling.nextElementSibling;
+        botonCarrito.disabled = true;
+        botonCarrito.classList.add('btn-deshabilitado');
     });
 });
+
 
 // Mostrar los botones de "Cancelar" y "Actualizar" al hacer click en los botones de sumar/restar
 document.querySelectorAll('.cantidad-btn').forEach(function(button) {
@@ -90,14 +100,17 @@ document.querySelectorAll('.cantidad-btn').forEach(function(button) {
         let value = parseInt(input.value);
         const productoId = input.getAttribute('data-producto-id');
 
-        // Si no hay una cantidad anterior registrada, guardarla
         if (!cantidadAnterior[productoId]) {
             cantidadAnterior[productoId] = value;
         }
 
-        // Mostrar los botones de opciones
         const opciones = this.parentNode.nextElementSibling;
         opciones.style.display = "flex";
+
+        // Deshabilitar el botón de agregar/eliminar
+        const botonCarrito = this.parentNode.nextElementSibling.nextElementSibling;
+        botonCarrito.disabled = true;
+        botonCarrito.classList.add('btn-deshabilitado');
 
         if (this.classList.contains('restar')) {
             if (value > 1) {
@@ -115,49 +128,64 @@ document.querySelectorAll('.btn-cancelar-cambio').forEach(function(btn) {
         const input = this.parentNode.previousElementSibling.querySelector('.cantidad-input');
         const productoId = input.getAttribute('data-producto-id'); 
 
-        // Restaurar la cantidad anterior
         input.value = cantidadAnterior[productoId] || 1; 
-        this.parentNode.style.display = 'none'; // Ocultar los botones de cambio
+        this.parentNode.style.display = 'none';
+
+        // Rehabilitar el botón de agregar/eliminar
+        const botonCarrito = this.parentNode.nextElementSibling;
+        botonCarrito.disabled = false;
+        botonCarrito.classList.remove('btn-deshabilitado');
     });
 });
 
 document.querySelectorAll('.btn-actualizar-cambio').forEach(function(btn) {
     btn.addEventListener('click', function() {
         const input = this.parentNode.previousElementSibling.querySelector('.cantidad-input');
+        const cantidad = parseInt(input.value);
+        const cantidadDisponible = parseInt(input.getAttribute('data-disponible')); 
         const productoId = input.getAttribute('data-producto-id'); 
 
-        // Guardar la cantidad actual antes de ocultar los botones
-        cantidadAnterior[productoId] = input.value;
+        // Validar si la cantidad ingresada es mayor que la disponible
+        if (cantidad > cantidadDisponible) {
+            alert(`Lo sentimos no se puede actualizar la cantidad porque no hay suficientes productos en existencia. Solo hay ${cantidadDisponible} disponibles.`);
+            input.value = cantidadDisponible; // Actualiza el input a la cantidad disponible
+            return; // Salir de la función
+        }
 
-        this.parentNode.style.display = 'none'; // Ocultar los botones de cambio
+        cantidadAnterior[productoId] = cantidad; // Guardar la nueva cantidad
+        this.parentNode.style.display = 'none'; // Ocultar opciones
+
+        // Rehabilitar el botón de agregar/eliminar
+        const botonCarrito = this.parentNode.nextElementSibling;
+        botonCarrito.disabled = false;
+        botonCarrito.classList.remove('btn-deshabilitado');
     });
 });
 
 // Cambiar el botón "Añadir al carrito" a "Eliminar del carrito" con confirmación
 document.querySelectorAll('.agregar-carrito-btn').forEach(function(button) {
     button.addEventListener('click', function() {
+        const input = this.parentNode.querySelector('.cantidad-input');
+        const cantidad = parseInt(input.value);
         const img = this.querySelector('img');
-        
+
+        // Cambio de estado del botón
         if (img.src.includes('agregarcarrito.png')) {
-            // Cambiar a "Eliminar del carrito"
-            img.src = 'img/eliminarcarrito.png'; // Cambia la ruta a la imagen de eliminar del carrito
+            img.src = 'img/eliminarcarrito.png';
             img.alt = 'Eliminar del carrito';
-            this.style.backgroundColor = '#dc3545'; // Cambiar el color a rojo para "Eliminar"
+            this.style.backgroundColor = '#dc3545';
         } else {
-            // Confirmación antes de eliminar del carrito
             const confirmacion = confirm("¿Deseas eliminar este producto del carrito?");
             if (confirmacion) {
-                // Cambiar de nuevo a "Añadir al carrito"
-                img.src = 'img/agregarcarrito.png'; // Cambia la ruta a la imagen de añadir al carrito
+                img.src = 'img/agregarcarrito.png';
                 img.alt = 'Añadir al carrito';
-                this.style.backgroundColor = '#28a745'; // Cambiar de nuevo a verde para "Añadir"
+                this.style.backgroundColor = '#28a745';
             }
         }
     });
 });
-
-
 </script>
+
 
 </body>
 </html>   

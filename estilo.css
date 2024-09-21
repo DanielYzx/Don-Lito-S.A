@@ -440,3 +440,211 @@ body {
     color: #ff0000; /* Cambia el color al pasar el mouse */
 }
 /* Termina los estilos para el formulario de ingreso de nueva contraseña */
+
+/*  aqui comienzan los estilos para la card de los productos  */
+
+/* Estilos para el contenedor de productos */
+.productos-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Card de productos */
+.card-product {
+    width: 250px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    max-height: 400px; /* Limitar la altura máxima de la tarjeta */
+    position: relative; /* Permite que los elementos dentro puedan posicionarse absolutamente */
+}
+
+/* Imagen dentro de la card */
+.card-product-img img {
+    width: 95%;
+    height: auto;
+    margin: 10px auto -20px auto; /* Reducir el margen inferior */
+    display: block;
+    border-radius: 10px;
+}
+
+/* Cuerpo de la card */
+.card-product-body {
+    padding: 15px;
+    text-align: center;
+    flex-grow: 1; /* Esto hará que el cuerpo de la tarjeta ocupe todo el espacio restante */
+    display: flex;
+    flex-direction: column; /* Para que los elementos dentro del cuerpo se alineen verticalmente */
+    justify-content: space-between; /* Distribuir uniformemente los elementos dentro del cuerpo */
+}
+
+/* Título del producto */
+.card-product-title {
+    font-size: 1.3em;
+    margin-bottom: -15px; /* Reducir el margen */
+}
+
+/* Precio del producto */
+.card-product-price {
+    font-size: 1.1em;
+    margin-bottom: -5px;
+}
+
+/* Descripción del producto */
+.card-product-description {
+    font-size: 0.9em;
+    margin-bottom: 15px; /* Ajustar el margen para reducir la altura */
+    overflow: hidden; /* Para controlar si el texto es muy largo */
+    text-overflow: ellipsis; /* Agregar puntos suspensivos si el texto es demasiado largo */
+    margin-top: 2px; /* Ajusta el margen superior según lo necesites */
+}
+.card-product-existencias {
+    font-size: 0.9em;
+    margin-top: -10px; /* Ajusta el margen superior según lo necesites */
+    margin-bottom: 5px; /* Mantén el margen inferior si lo deseas */
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+/* Controles de cantidad del producto */
+/* Estilos para la cantidad de producto */
+.producto-cantidad {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    
+}
+
+.cantidad-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 0 10px;
+    cursor: pointer;
+    height: 40px; /* Altura del input */
+    font-size: 18px;
+    line-height: 1; /* Ajustar la alineación vertical del texto */
+}
+
+.cantidad-input {
+    width: 50px;
+    text-align: center;
+    border: 1px solid #ccc;
+    height: 30px; /* Ajustar la altura */
+    margin: 0 5px; /* Margen entre los botones y el input */
+    padding: 0;
+    pointer-events: none; /* Deshabilitar la interacción directa con el campo */
+}
+
+/* Ocultar los controles de incremento/decremento en campos de tipo número */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield; /* Para Firefox */
+}
+
+
+.cantidad-btn.restar {
+    border-radius: 5px 0 0 5px; /* Bordes redondeados del botón de restar */
+    height: 30px; /* Ajustar la altura */
+}
+
+.cantidad-btn.sumar {
+    border-radius: 0 5px 5px 0; /* Bordes redondeados del botón de sumar */
+    height: 30px; /* Ajustar la altura */
+}
+
+/* Botón de agregar al carrito */
+.agregar-carrito-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px; /* Ajusta el espacio interior del botón */
+    cursor: pointer;
+    width: 90px; /* Ancho específico del botón */
+    height: 50px; /* Altura específica del botón */
+    border-radius: 10px;
+    font-size: 1em;
+    margin: 20px auto 0 auto; /* Centrar el botón horizontalmente y agregar margen en la parte superior */
+    margin-top: auto; /* Hacer que el botón se adhiera al fondo del card */
+    display: flex; /* Asegura que el contenido esté centrado si usas imágenes */
+    align-items: center; /* Centra el contenido verticalmente */
+    justify-content: center; /* Centra el contenido horizontalmente */
+}
+
+/* Hover en el botón de agregar al carrito */
+.agregar-carrito-btn:hover {
+    background-color: #218838;
+}
+
+
+.card-product:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+}
+
+
+/* Estilo para los botones de cancelar y actualizar */
+/* Estilo para los botones de cancelar y actualizar */
+.opciones-cantidad {
+    margin-top: 1px;
+    display: flex;
+    justify-content: center; /* Alinea los botones hacia la izquierda */
+    margin-bottom: 8px;
+}
+
+.btn-cancelar-cambio {
+    margin-right: 5px; /* Reduce el espacio entre los botones */
+}
+
+.btn-cancelar-cambio, .btn-actualizar-cambio {
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.btn-cancelar-cambio {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-actualizar-cambio {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* Estilo para el mensaje de actualización */
+.mensaje-actualizacion {
+    margin-top: 10px;
+    color: #28a745;
+    font-weight: bold;
+    display: none; /* Inicialmente oculto */
+}
+
+
+.btn-deshabilitado {
+    background-color: #a09c9c; /* Gris claro */
+    cursor: not-allowed; /* Cambiar el cursor para indicar que está deshabilitado */
+}
+
+
+
+
+
+
+
+
+/*  aqui terminan los estilos para la card de los productos  */
