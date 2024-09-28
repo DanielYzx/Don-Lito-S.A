@@ -6,6 +6,7 @@ session_start();
 
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,10 +29,13 @@ session_start();
                 <div class="col-6 col-md-4 d-flex justify-content-end align-items-center order-md-2">
                     <?php if (isset($_SESSION['user_name'])): ?>
                         <span class="me-2">Bienvenido, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                        <a href="cerrar_sesion.php" class="btn btn-danger">Cerrar sesión</a>
+                        <a href="cerrar_sesion.php" class="btn btn-danger">Cerrar sesión</a>    
                     <?php else: ?>
                         <img src="img/login.png" alt="User Icon" width="40" height="40" class="me-2">
                         <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
+                        <div class="vertical-divider"></div>
+                        <img src="img/login2.png" alt="User Icon" width="40" height="40" class="me-2">
+                        <button type="button" class="btn btn-primary" onclick="showLoginFormem()">Inicia sesión Empleados</button>
                     <?php endif; ?>
                     <div class="vertical-divider"></div>
                     <button type="button" class="btn" width="40" height="40">
@@ -53,6 +57,47 @@ session_start();
 
     <div class="main-content">
    
+    <!-- Aquí inicia el Contenedor del formulario de inicio de sesión empleados-->
+    <?php if (!isset($_SESSION['user_name'])): ?>
+<div class="login-overlay" id="loginemFormContainer">
+    <div class="login-form-container">
+        <button class="close-btn" id="closeBtnem">&times;</button>
+        <h2>Iniciar Sesión</h2>
+
+
+        <!-- Mostrar mensaje de error si existe -->
+<?php if (isset($_GET['error'])): ?>
+    <div id="errorMessage" class="alert alert-danger" >
+        <?php echo htmlspecialchars($_GET['error']); ?>
+    </div>
+<?php endif; ?>
+
+        <form id="loginForm" action="procesar_login.php" method="POST"">
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="cargo" class="form-label">Cargo</label>
+                <input type="cargo" class="form-control" id="cargo" name="cargo" readonly>
+            </div>
+            <div class="mb-3 text-end">
+            <a href="#" onclick="showResetForm()" class="text-muted">¿Olvidaste tu contraseña?</a>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            </div>
+            
+        </form>
+    </div>
+</div>
+<?php endif; ?>
+ <!-- Aquí termina el Contenedor del formulario de inicio de sesión empleados-->
+
     <!-- Aquí inicia el Contenedor del formulario de inicio de sesión -->
     <?php if (!isset($_SESSION['user_name'])): ?>
 <div class="login-overlay" id="loginFormContainer">
@@ -306,7 +351,27 @@ if ($result->num_rows > 0) {
     <script src="js/bootstrap.bundle.min.js"></script>
    <script src="scroll.js"></script>    
    <script>
- // Funciones relacionadas con el formulario de login
+
+
+ // Funciones relacionadas con el formulario de login empleado
+function showLoginFormem() {
+    document.getElementById('loginemFormContainer').style.display = 'flex';
+}
+
+document.getElementById("closeBtnem").addEventListener("click", function() {
+    document.getElementById("loginemFormContainer").style.display = "none";
+    removeErrorParam();
+    clearLoginFormFields();
+
+    // Ocultar el mensaje de error
+    const errorMsg = document.getElementById("errorMessage");
+    if (errorMsg) {
+        errorMsg.style.display = "none";
+
+    }
+
+});
+// Funciones relacionadas con el formulario de login
 function showLoginForm() {
     document.getElementById('loginFormContainer').style.display = 'flex';
 }
@@ -342,6 +407,15 @@ document.addEventListener('DOMContentLoaded', function() {
         removeErrorParam();
     } else {
         document.getElementById("loginFormContainer").style.display = "none";
+    }
+});
+document.addEventListener('DOMContentLoadedem', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error')) {
+        showLoginForm();
+        removeErrorParam();
+    } else {
+        document.getElementById("loginemFormContainer").style.display = "none";
     }
 });
 
@@ -420,7 +494,7 @@ function showResetForm() {
 
     // Solo cierra el formulario de login si está abierto
     closeLoginForm();
-    
+    closeLoginFormem();
     // Aquí podrías manejar qué formulario mostrar, dependiendo del estado actual
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('show_validation_code')) {
@@ -485,7 +559,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function closeLoginForm() {
     document.getElementById("loginFormContainer").style.display = "none";
 }
-
+// Función para cerrar el formulario de inicio de sesión
+function closeLoginFormem() {
+    document.getElementById("loginemFormContainer").style.display = "none";
+}
 // Función para cerrar el formulario de restablecimiento de contraseña
 function closeResetForm() {
     document.getElementById("resetFormContainer").style.display = "none";
@@ -518,6 +595,24 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("resetFormContainer").style.display = "flex";
         // Aquí podrías hacer que el mensaje de error sea visible, si no lo es.
     }
+    function showLoginForm() {
+            document.getElementById('loginFormContainer').style.display = 'block';
+            document.getElementById('loginemFormContainer').style.display = 'none';
+        }
+
+        function showLoginFormem() {
+            document.getElementById('loginemFormContainer').style.display = 'block';
+            document.getElementById('loginFormContainer').style.display = 'none';
+        }
+
+        function closeLoginForms() {
+            document.getElementById('loginFormContainer').style.display = 'none';
+            document.getElementById('loginemFormContainer').style.display = 'none';
+        }
+
+        window.onload = function() {
+            document.getElementById('loginemFormContainer').style.display = 'none'; // Asegúrate de que el formulario de empleados esté oculto al cargar
+        }
 });
 
 
