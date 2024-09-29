@@ -443,6 +443,16 @@ body {
 
 /*  aqui comienzan los estilos para la card de los productos  */
 
+/* Contenedor principal que envuelve todo */
+
+.contenedor-principal {
+    width: 100%;
+    max-width: 1200px; /* Limita el ancho máximo para adaptarse a diferentes pantallas */
+    margin: 0 auto; /* Centrar el contenedor */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
 /* Estilos para el contenedor de productos */
 .productos-container {
     display: flex;
@@ -487,23 +497,26 @@ body {
 
 /* Título del producto */
 .card-product-title {
-    font-size: 1.3em;
-    margin-bottom: -15px; /* Reducir el margen */
+    margin-top: 10px; /* Ajusta el margen superior según lo necesites */
+    font-size: 1.3em !important;
+    margin-bottom: -10px; /* Reducir el margen */
 }
+
 
 /* Precio del producto */
 .card-product-price {
-    font-size: 1.1em;
-    margin-bottom: -5px;
+    margin-top: 10px; /* Ajusta el margen superior según lo necesites */
+    font-size: 1em !important;
+    margin-bottom: -10px; /* Reducir el margen */
 }
 
 /* Descripción del producto */
 .card-product-description {
-    font-size: 0.9em;
-    margin-bottom: 15px; /* Ajustar el margen para reducir la altura */
+    font-size: 0.8em;
+    margin-bottom: 10px; /* Ajustar el margen para reducir la altura */
     overflow: hidden; /* Para controlar si el texto es muy largo */
     text-overflow: ellipsis; /* Agregar puntos suspensivos si el texto es demasiado largo */
-    margin-top: 2px; /* Ajusta el margen superior según lo necesites */
+    margin-top: 10px; /* Ajusta el margen superior según lo necesites */
 }
 .card-product-existencias {
     font-size: 0.9em;
@@ -640,11 +653,4 @@ input[type=number] {
     cursor: not-allowed; /* Cambiar el cursor para indicar que está deshabilitado */
 }
 
-
-
-
-
-
-
-
-/*  aqui terminan los estilos para la card de los productos  */
+/*  aqui terminan los estilos para la card de los productos  */  
