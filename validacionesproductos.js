@@ -94,25 +94,8 @@ document.querySelectorAll('.btn-actualizar-cambio').forEach(function(btn) {
     });
 });
 
-// Cambiar el botón "Añadir al carrito" a "Eliminar del carrito" con confirmación
-document.querySelectorAll('.agregar-carrito-btn').forEach(function(button) {
-    button.addEventListener('click', function() {
-        const input = this.parentNode.querySelector('.cantidad-input');
-        const cantidad = parseInt(input.value);
-        const img = this.querySelector('img');
 
-        // Cambio de estado del botón
-        if (img.src.includes('agregarcarrito.png')) {
-            img.src = 'img/eliminarcarrito.png';
-            img.alt = 'Eliminar del carrito';
-            this.style.backgroundColor = '#dc3545';
-        } else {
-            const confirmacion = confirm("¿Deseas eliminar este producto del carrito?");
-            if (confirmacion) {
-                img.src = 'img/agregarcarrito.png';
-                img.alt = 'Añadir al carrito';
-                this.style.backgroundColor = '#28a745';
-            }
-        }
-    });
-});
+
+
+
+

@@ -19,7 +19,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if ($stmt->execute()) {
                 // Si la actualización fue exitosa
-                header('Location: index.php?success_reset=Contraseña actualizada correctamente.');
+                //header('Location: index.php?success_reset=Contraseña actualizada correctamente.');
+                header('Location: index.php?success_password_change=true');
                 //header('Location: index.php?success_reset=Contraseña actualizada correctamente. Inicia sesión.');
                 exit();
             } else {
@@ -37,4 +38,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
     }
 }
-?>
+?>  

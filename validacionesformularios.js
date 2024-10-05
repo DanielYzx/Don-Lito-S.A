@@ -1,10 +1,12 @@
- // Funciones relacionadas con el formulario de login
- function showLoginForm() {
+
+
+function showLoginForm() {
+    var loginFormContainer = document.getElementById('loginFormContainer');
+    loginFormContainer.style.display = 'block';  // Mostrar el formulario de login
+    document.body.classList.add('no-scroll');    // Evitar que la página se desplace mientras se muestra el formulario
     document.getElementById('loginFormContainer').style.display = 'flex';
-    document.querySelector('input[name="redirect_url"]').value = window.location.href; // Captura la URL actual
+    document.querySelector('input[name="redirect_url"]').value = window.location.href; // Captura la URL act
 }
-
-
 
 
 document.getElementById("closeBtn").addEventListener("click", function() {
@@ -44,8 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // Funciones relacionadas con el formulario de registro
 function showRegisterForm() {
     document.getElementById('registerFormContainer').style.display = 'flex';
-    document.querySelector('input[name="redirect_url"]').value = window.location.href; // Captura la URL actual
-}
+}      
+
+
 
 
 document.getElementById("closeRegisterBtn").addEventListener("click", function() {
@@ -113,102 +116,81 @@ function showLoginForm() {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // aqui inician la Función para  el formulario de restablecimiento de contraseña
 // Funciones relacionadas con el formulario de restablecimiento de contraseña
+// Funciones relacionadas con el formulario de restablecimiento de contraseña
 function showResetForm() {
     document.getElementById('resetFormContainer').style.display = 'flex';
+    closeLoginForm(); // Solo cierra el formulario de login si está abierto
 
-    // Solo cierra el formulario de login si está abierto
-    closeLoginForm();
-
-    // Aquí podrías manejar qué formulario mostrar, dependiendo del estado actual
     const urlParams = new URLSearchParams(window.location.search);
+    
     if (urlParams.has('show_validation_code')) {
-        document.getElementById("resetForm").style.display = "none";
-        document.getElementById("validationForm").style.display = "block";
+        toggleForms('resetForm', 'validationForm');
     } else if (urlParams.has('show_new_password')) {
-        document.getElementById("validationForm").style.display = "none";
-        document.getElementById("newPasswordForm").style.display = "block";
+        toggleForms('validationForm', 'newPasswordForm');
     } else {
-        document.getElementById("resetForm").style.display = "block";
+        toggleForms('', 'resetForm');
     }
+}
+
+// Función para mostrar un formulario y ocultar otro
+function toggleForms(hideForm, showForm) {
+    if (hideForm) document.getElementById(hideForm).style.display = "none";
+    if (showForm) document.getElementById(showForm).style.display = "block";
+}
+
+// Función para limpiar parámetros relacionados con el restablecimiento
+function clearResetParams() {
+    const url = new URL(window.location);
+    ['show_validation_code', 'show_new_password', 'error_reset', 'success_password_change'].forEach(param => {
+        url.searchParams.delete(param);
+    });
+    window.history.replaceState({}, document.title, url);
 }
 
 document.getElementById("closeResetBtn").addEventListener("click", function() {
     document.getElementById("resetFormContainer").style.display = "none";
-    removeResetErrorParam();
-    removeResetSuccessParam();
+    clearResetParams();
     clearResetFormFields();
 
-    // Ocultar el mensaje de error
     const errorMsg = document.getElementById("errorResetMessage");
     if (errorMsg) {
         errorMsg.style.display = "none";
-
     }
 
-
     window.location.href = 'index.php?show_reset_form=true';
-
 });
 
+// Limpiar campos del formulario de restablecimiento
 function clearResetFormFields() {
     document.getElementById("resetForm").reset();
 }
 
-function removeResetErrorParam() {
-    const url = new URL(window.location);
-    url.searchParams.delete('error_reset');
-    window.history.replaceState({}, document.title, url);
-}
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('error_reset')) {
-        showResetForm();
-        removeResetErrorParam();
-    } else if (urlParams.has('success_reset')) {
-        showResetForm();
-        removeResetSuccessParam();
-    } else {
-        document.getElementById("resetFormContainer").style.display = "none";
-    }
-});
-
-// Función para cerrar el formulario de inicio de sesión
+// Cerrar formularios
 function closeLoginForm() {
     document.getElementById("loginFormContainer").style.display = "none";
 }
 
-// Función para cerrar el formulario de restablecimiento de contraseña
 function closeResetForm() {
     document.getElementById("resetFormContainer").style.display = "none";
-
 }
 
-////////////////////////////////////////////////////////////////////////////
+// Evento que maneja la inicialización de la página y qué formularios mostrar
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
 
-    // Mostrar el formulario de validación de código si se envió el correo correctamente
+    // Manejo de formularios según parámetros en la URL
     if (urlParams.has('show_validation_code')) {
-        // Mostrar el contenedor del formulario de restablecimiento
         document.getElementById("resetFormContainer").style.display = "flex";
-        // Ocultar el formulario de ingreso de correo
-        document.getElementById("resetForm").style.display = "none";
-        // Mostrar el formulario de validación de código
-        document.getElementById("validationForm").style.display = "block";
-    }
-
-    // Mostrar el formulario de nueva contraseña si el código fue validado correctamente
-    if (urlParams.has('show_new_password')) {
+        toggleForms('resetForm', 'validationForm');
+    } else if (urlParams.has('show_new_password')) {
         document.getElementById("resetFormContainer").style.display = "flex";
-        document.getElementById("validationForm").style.display = "none";
-        document.getElementById("newPasswordForm").style.display = "block";
-    }
-
-    // Manejo de mensajes de error o éxito
-    if (urlParams.has('error_reset')) {
+        toggleForms('validationForm', 'newPasswordForm');
+    } else if (urlParams.has('success_password_change')) {
+        document.getElementById("loginFormContainer").style.display = "flex";
+        document.getElementById("resetFormContainer").style.display = "none";
+        document.getElementById("newPasswordForm").style.display = "none";
+        clearResetParams(); // Limpiar los parámetros
+    } else if (urlParams.has('error_reset')) {
         document.getElementById("resetFormContainer").style.display = "flex";
-        // Aquí podrías hacer que el mensaje de error sea visible, si no lo es.
     }
 });

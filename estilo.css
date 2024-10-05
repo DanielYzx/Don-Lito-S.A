@@ -653,4 +653,11 @@ input[type=number] {
     cursor: not-allowed; /* Cambiar el cursor para indicar que está deshabilitado */
 }
 
+.cantidad-btn:disabled,
+.agregar-carrito-btn:disabled {
+    background-color: #cccccc; /* Color gris para los botones desactivados */
+    cursor: not-allowed;
+}
+
+
 /*  aqui terminan los estilos para la card de los productos  */  

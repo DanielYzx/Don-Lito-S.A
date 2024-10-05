@@ -27,9 +27,9 @@ session_start();
                     </a>
                 </div>
                 <div class="col-6 col-md-4 d-flex justify-content-end align-items-center order-md-2">
-                    <?php if (isset($_SESSION['user_name'])): ?>
+                <?php if (isset($_SESSION['user_name'])): ?>
                         <span class="me-2">Bienvenido, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                        <a href="cerrar_sesion.php" class="btn btn-danger">Cerrar sesión</a>
+                        <a href="cerrar_sesion.php?redirect=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="btn btn-danger">Cerrar sesión</a>   
                     <?php else: ?>
                         <img src="img/login.png" alt="User Icon" width="40" height="40" class="me-2">
                         <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
@@ -54,42 +54,45 @@ session_start();
 
     <div class="main-content">
 
-        <!-- Formulario de inicio de sesión -->
-        <?php if (!isset($_SESSION['user_name'])): ?>
-            <div class="login-overlay" id="loginFormContainer">
-                <div class="login-form-container">
-                    <button class="close-btn" id="closeBtn">&times;</button>
-                    <h2>Iniciar Sesión</h2>
+       <!-- Aquí inicia el Contenedor del formulario de inicio de sesión -->
+    <?php if (!isset($_SESSION['user_name'])): ?>
+<div class="login-overlay" id="loginFormContainer">
+    <div class="login-form-container">
+        <button class="close-btn" id="closeBtn">&times;</button>
+        <h2>Iniciar Sesión</h2>
 
-                    <!-- Mensaje de error si existe -->
-                    <?php if (isset($_GET['error'])): ?>
-                        <div id="errorMessage" class="alert alert-danger">
-                            <?php echo htmlspecialchars($_GET['error']); ?>
-                        </div>
-                    <?php endif; ?>
 
-                    <form id="loginForm" action="procesar_login.php" method="POST">
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Correo Electrónico</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <div class="mb-3 text-end">
-                            <a href="#" onclick="showResetForm()" class="text-muted">¿Olvidaste tu contraseña?</a>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-                        </div>
-                        <div class="mt-3 text-center">
-                            <a href="#" onclick="showRegisterForm()" class="text-muted">¿No tienes cuenta? Crea una ahora</a>
-                        </div>
-                    </form>
-                </div>
+        <!-- Mostrar mensaje de error si existe -->
+<?php if (isset($_GET['error'])): ?>
+    <div id="errorMessage" class="alert alert-danger" >
+        <?php echo htmlspecialchars($_GET['error']); ?>
+    </div>
+<?php endif; ?>
+
+        <form id="loginForm" action="procesar_login.php" method="POST"">
+        <input type="hidden" name="redirect_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>">
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <input type="email" class="form-control" id="email" name="email" required>
             </div>
-        <?php endif; ?>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3 text-end">
+            <a href="#" onclick="showResetForm()" class="text-muted">¿Olvidaste tu contraseña?</a>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            </div>
+            <div class="mt-3 text-center">
+            <a href="#" onclick="showRegisterForm()" class="text-muted">¿No tienes cuenta? Crea una ahora</a>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
+    <!-- Aquí termina el Contenedor del formulario de inicio de sesión -->
 
         <!-- Formulario de Registro de Usuario -->
         <?php if (!isset($_SESSION['user_name'])): ?>
@@ -243,65 +246,134 @@ session_start();
 
 <!-- Categorías destacadas -->
 <div class="contenedor-principal">
-    <?php
-    include 'conexion.php';
+<?php
+include 'conexion.php';
 
-    // Obtener el ID de la categoría desde la URL
-    $categoria_id = $_GET['categoria_id'];
 
-    // Consulta para obtener los productos de la categoría seleccionada
-    $sql = "SELECT id, nombre, precio, descripción, imagen, cantidad_disponible FROM productos WHERE categoria_id = $categoria_id";
-    $result = $conexion->query($sql);
+// Verificar si el usuario está logueado
+function usuarioLogueado() {
+    return isset($_SESSION['user_id']); // O el nombre de la variable de sesión que uses para almacenar el ID del usuario
+}
 
-    if ($result->num_rows > 0) {
-        // Contenedor de productos
-        echo '<div class="productos-container">';
+// Obtener el ID de la categoría desde la URL y asegurarse de que es un número entero
+$categoria_id = isset($_GET['categoria_id']) ? (int)$_GET['categoria_id'] : 0;
 
-        while ($producto = $result->fetch_assoc()) {
-            // Mostrar producto en una tarjeta personalizada
-            echo '<div class="card-product">';
-            echo '<div class="card-product-img">';
-            echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">'; // Cambia la ruta de la imagen si es necesario
-            echo '</div>';
-            echo '<div class="card-product-body">';
-            echo '<h2 class="card-product-title">' . $producto["nombre"] . '</h2>';
-            echo '<p class="card-product-price">Precio: $' . $producto["precio"] . '</p>';
-            echo '<p class="card-product-description">' . $producto["descripción"] . '</p>';
-            echo '<p class="card-product-existencias">Existencias: ' . $producto["cantidad_disponible"] . '</p>';
+if ($categoria_id > 0) {
+    // Preparar la consulta SQL
+    $sql = "SELECT id, nombre, precio, descripción, imagen, cantidad_disponible 
+            FROM productos 
+            WHERE categoria_id = ?";
 
-            // Sección de cantidad
-            echo '<div class="producto-cantidad">';
-            echo '<button class="cantidad-btn restar">-</button>';
-            echo '<input type="number" value="1" min="1" class="cantidad-input" data-producto-id="' . $producto["id"] . '" data-disponible="' . $producto["cantidad_disponible"] . '">';
-            echo '<button class="cantidad-btn sumar">+</button>';
-            echo '</div>';
+    // Preparar la sentencia
+    if ($stmt = $conexion->prepare($sql)) {
+        // Vincular el parámetro (sólo números enteros)
+        $stmt->bind_param('i', $categoria_id);
 
-            // Botones de cancelar y actualizar ocultos
-            echo '<div class="opciones-cantidad" style="display:none;">';
-            echo '<button class="btn-cancelar-cambio"><img src="img/cancelarcarrito.png" alt="Cancelar" style="width: 20px; height: 20px;"></button>';
-            echo '<button class="btn-actualizar-cambio"><img src="img/actualizarcarrito.png" alt="Actualizar" style="width: 20px; height: 20px;"></button>';
-            echo '</div>';
+        // Ejecutar la sentencia
+        $stmt->execute();
 
-            // Botón de agregar al carrito o eliminar del carrito
-            echo '<button class="agregar-carrito-btn"><img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
-            echo '</div>'; // Cerrar el cuerpo de la tarjeta
-            echo '</div>'; // Cerrar la tarjeta del producto
+        // Obtener los resultados
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            // Contenedor de productos
+            echo '<div class="productos-container">';
+
+            while ($producto = $result->fetch_assoc()) {
+                // Mostrar producto en una tarjeta personalizada
+                echo '<div class="card-product">';
+                echo '<div class="card-product-img">';
+                echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">'; // Cambia la ruta de la imagen si es necesario
+                echo '</div>';
+                echo '<div class="card-product-body">';
+                echo '<h2 class="card-product-title">' . htmlspecialchars($producto["nombre"]) . '</h2>';
+                echo '<p class="card-product-price">Precio: $' . htmlspecialchars($producto["precio"]) . '</p>';
+                echo '<p class="card-product-description">' . htmlspecialchars($producto["descripción"]) . '</p>';
+                echo '<p class="card-product-existencias">Existencias: ' . htmlspecialchars($producto["cantidad_disponible"]) . '</p>';
+
+                // Sección de cantidad
+                echo '<div class="producto-cantidad">';
+                echo '<button class="cantidad-btn restar"'. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .'>-</button>';
+                echo '<input type="number" value="1" min="1" class="cantidad-input" data-producto-id="' . htmlspecialchars($producto["id"]) . '" data-disponible="' . htmlspecialchars($producto["cantidad_disponible"]) . '" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . '>';
+                echo '<button class="cantidad-btn sumar"'. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .'>+</button>';
+                echo '</div>';
+
+                // Botón de agregar al carrito o eliminar del carrito
+                //echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" '. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                //echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                if (usuarioLogueado()) {
+                    // Botón para agregar o eliminar del carrito
+                    echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" '. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                    echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                } else {
+                    // Si no está logueado, mostramos el botón para redirigir al formulario de login
+                   // echo '<button class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>';
+                    echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" '. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                    echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                }
+                echo '</div>'; // Cerrar el cuerpo de la tarjeta
+                echo '</div>'; // Cerrar la tarjeta del producto
+            }
+
+            echo '</div>'; // Cerrar el contenedor de productos
+        } else {
+            echo '<p>No hay productos disponibles en esta categoría.</p>';
         }
 
-        echo '</div>'; // Cerrar el contenedor de productos
+        // Cerrar la sentencia
+        $stmt->close();
     } else {
-        echo '<p>No hay productos disponibles en esta categoría.</p>';
+        echo '<p>Error en la consulta: ' . $conexion->error . '</p>';
     }
+} else {
+    echo '<p>Categoría no válida.</p>';
+}
 
-    $conexion->close();
-    ?>
+// Cerrar la conexión
+$conexion->close();
+?>
 </div>
 
- </div>
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="scroll.js"></script>
+<script src="validacionesformularios.js"></script>
+<script>
 
- <script src="js/bootstrap.bundle.min.js"></script>
- <script src="scroll.js"></script>
- <script src="validacionesformularios.js"></script>
- <script src="validacionesproductos.js"></script>
+
+
+    function handleAddToCart(event, button) {
+    const img = button.querySelector('img');
+    const productId = button.getAttribute('data-producto-id');
+
+    // Aquí podrías verificar si el usuario está logueado desde el frontend, por ejemplo, con una variable de sesión
+    const isLoggedIn = <?php echo json_encode(usuarioLogueado()); ?>; // Convertir el valor de PHP a JS
+
+    if (!isLoggedIn) {
+        // Si no está logueado, mostrar el formulario de inicio de sesión
+        showLoginForm();
+        return;
+    }
+
+    // Si está logueado, proceder con agregar/eliminar del carrito
+    const input = button.parentNode.querySelector('.cantidad-input');
+    const cantidad = parseInt(input.value);
+
+    if (img.src.includes('agregarcarrito.png')) {
+        img.src = 'img/eliminarcarrito.png';
+        img.alt = 'Eliminar del carrito';
+        button.style.backgroundColor = '#dc3545';
+        // Aquí agregarías el código para añadir el producto al carrito (AJAX, redirección, etc.)
+    } else {
+        const confirmacion = confirm("¿Deseas eliminar este producto del carrito?");
+        if (confirmacion) {
+            img.src = 'img/agregarcarrito.png';
+            img.alt = 'Añadir al carrito';
+            button.style.backgroundColor = '#28a745';
+            // Aquí el código para eliminar el producto del carrito
+        }
+    }
+}
+
+</script>
 </body>
 </html>

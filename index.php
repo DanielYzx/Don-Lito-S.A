@@ -29,13 +29,10 @@ session_start();
                 <div class="col-6 col-md-4 d-flex justify-content-end align-items-center order-md-2">
                     <?php if (isset($_SESSION['user_name'])): ?>
                         <span class="me-2">Bienvenido, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                        <a href="cerrar_sesion.php" class="btn btn-danger">Cerrar sesión</a>    
+                        <a href="cerrar_sesion.php?redirect=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="btn btn-danger">Cerrar sesión</a>   
                     <?php else: ?>
                         <img src="img/login.png" alt="User Icon" width="40" height="40" class="me-2">
                         <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
-                        <div class="vertical-divider"></div>
-                        <img src="img/login2.png" alt="User Icon" width="40" height="40" class="me-2">
-                        <button type="button" class="btn btn-primary" onclick="showLoginFormem()">Inicia sesión Empleados</button>
                     <?php endif; ?>
                     <div class="vertical-divider"></div>
                     <button type="button" class="btn" width="40" height="40">
@@ -57,46 +54,6 @@ session_start();
 
     <div class="main-content">
    
-    <!-- Aquí inicia el Contenedor del formulario de inicio de sesión empleados-->
-    <?php if (!isset($_SESSION['user_name'])): ?>
-<div class="login-overlay" id="loginemFormContainer">
-    <div class="login-form-container">
-        <button class="close-btn" id="closeBtnem">&times;</button>
-        <h2>Iniciar Sesión</h2>
-
-
-        <!-- Mostrar mensaje de error si existe -->
-<?php if (isset($_GET['error'])): ?>
-    <div id="errorMessage" class="alert alert-danger" >
-        <?php echo htmlspecialchars($_GET['error']); ?>
-    </div>
-<?php endif; ?>
-
-        <form id="loginForm" action="procesar_login.php" method="POST"">
-            <div class="mb-3">
-                <label for="email" class="form-label">Correo Electrónico</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <div class="mb-3">
-                <label for="cargo" class="form-label">Cargo</label>
-                <input type="cargo" class="form-control" id="cargo" name="cargo" readonly>
-            </div>
-            <div class="mb-3 text-end">
-            <a href="#" onclick="showResetForm()" class="text-muted">¿Olvidaste tu contraseña?</a>
-            </div>
-            <div class="d-flex justify-content-center">
-                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-            </div>
-            
-        </form>
-    </div>
-</div>
-<?php endif; ?>
- <!-- Aquí termina el Contenedor del formulario de inicio de sesión empleados-->
 
     <!-- Aquí inicia el Contenedor del formulario de inicio de sesión -->
     <?php if (!isset($_SESSION['user_name'])): ?>
@@ -114,6 +71,7 @@ session_start();
 <?php endif; ?>
 
         <form id="loginForm" action="procesar_login.php" method="POST"">
+        <input type="hidden" name="redirect_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>">
             <div class="mb-3">
                 <label for="email" class="form-label">Correo Electrónico</label>
                 <input type="email" class="form-control" id="email" name="email" required>
@@ -208,7 +166,6 @@ session_start();
         <!-- Paso 1: Ingresar correo -->
       
         <form id="resetForm" action="procesar_reset_local.php" method="POST" style="display: <?php echo isset($_GET['show_reset_form']) ? 'block' : 'none'; ?>;">
-
             <div class="mb-3">
                 <label for="resetEmail" class="form-label">Correo Electrónico</label>
                 <input type="email" class="form-control" id="resetEmail" name="email" required>
@@ -218,8 +175,8 @@ session_start();
             </div>
         </form>
         <!-- Paso 2: Ingresar código de validación (oculto inicialmente) -->
-        <form id="validationForm" action="validar_codigo.php" method="POST" style="display: <?php echo isset($_GET['show_validation_code']) ? 'block' : 'none'; ?>;">
-            <div class="mb-3">
+        <form id="validationForm" action="validar_codigo.php" method="POST" style="display: <?php echo isset($_GET['show_validation_code']) ? 'block' : 'none'; ?>;">  
+        <div class="mb-3">
                 <label for="validationCode" class="form-label">Código de Validación</label>
                 <input type="text" class="form-control" id="validationCode" name="validation_code" required>
             </div>
@@ -231,7 +188,7 @@ session_start();
         <!-- Paso 3: Ingresar nueva contraseña (oculto inicialmente) -->
         <form id="newPasswordForm" action="procesar_nueva_contrasena.php" method="POST" style="display: <?php echo isset($_GET['show_new_password_form']) ? 'block' : 'none'; ?>;">
    <!-- Campo de email oculto -->
-<input type="hidden" name="email" value="<?php echo isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : ''; ?>">
+   <input type="hidden" name="email" value="<?php echo isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : ''; ?>">
     <div class="mb-3">
         <label for="newPassword" class="form-label">Nueva Contraseña</label>
         <input type="password" class="form-control" id="newPassword" name="new_password" required>
@@ -321,7 +278,7 @@ if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         echo '<div class="col-auto">';
                        // echo '<a href="#" class="card btn text-center">';
-                        echo '<a href="productos.php?categoria_id=' . $row["id"] . '" class="card btn text-center">'; // Redirige a productos.php con el ID de la categoría
+                        echo '<a href="prueba.php?categoria_id=' . $row["id"] . '" class="card btn text-center">'; // Redirige a productos.php con el ID de la categoría
                         echo '<div class="card-body">';
                         echo '<p class="card-text">' . $row["nombre"] . '</p>';
                         echo '</div>';
@@ -349,32 +306,9 @@ if ($result->num_rows > 0) {
     </div>
 
     <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="validacionesformularios.js"></script>
    <script src="scroll.js"></script>    
    <script>
-
-
- // Funciones relacionadas con el formulario de login empleado
-function showLoginFormem() {
-    document.getElementById('loginemFormContainer').style.display = 'flex';
-}
-
-document.getElementById("closeBtnem").addEventListener("click", function() {
-    document.getElementById("loginemFormContainer").style.display = "none";
-    removeErrorParam();
-    clearLoginFormFields();
-
-    // Ocultar el mensaje de error
-    const errorMsg = document.getElementById("errorMessage");
-    if (errorMsg) {
-        errorMsg.style.display = "none";
-
-    }
-
-});
-
-
-
-
 </script>
 </script>
 </body>

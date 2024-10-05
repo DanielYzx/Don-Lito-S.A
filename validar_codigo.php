@@ -22,4 +22,4 @@ if (isset($_POST['validation_code'])) {
         exit();
     }
 }
-?>
+?>           
