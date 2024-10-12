@@ -1,25 +1,5 @@
 
 
- // Funciones relacionadas con el formulario de login empleado
- function showLoginFormem() {
-    document.getElementById('loginemFormContainer').style.display = 'flex';
-}
-
-document.getElementById("closeBtnem").addEventListener("click", function() {
-    document.getElementById("loginemFormContainer").style.display = "none";
-    removeErrorParam();
-    clearLoginFormFields();
-
-    // Ocultar el mensaje de error
-    const errorMsg = document.getElementById("errorMessage");
-    if (errorMsg) {
-        errorMsg.style.display = "none";
-
-    }
-
-});
-
-
 
 function showLoginForm() {
     var loginFormContainer = document.getElementById('loginFormContainer');

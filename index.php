@@ -57,21 +57,24 @@ session_start();
 
     <div class="main-content">
         <!-- Aquí inicia el Contenedor del formulario de inicio de sesión empleados-->
-    <?php if (!isset($_SESSION['user_name'])): ?>
-<div class="login-overlay" id="loginemFormContainer">
+        <?php if (!isset($_SESSION['user_name'])): ?>
+<div class="login-overlay-em" id="loginemFormContainer" style="display: none;"> <!-- Oculto por defecto -->
     <div class="login-form-container">
         <button class="close-btn" id="closeBtnem">&times;</button>
         <h2>Iniciar Sesión</h2>
 
-
         <!-- Mostrar mensaje de error si existe -->
-<?php if (isset($_GET['error'])): ?>
-    <div id="errorMessage" class="alert alert-danger" >
-        <?php echo htmlspecialchars($_GET['error']); ?>
-    </div>
-<?php endif; ?>
+        <?php if (isset($_GET['error'])): ?>
+            <div id="errorMessage" class="alert alert-danger">
+                <?php echo htmlspecialchars($_GET['error']); ?>
+            </div>
+            <script>
+                // Mostrar el formulario si hay un error
+                document.getElementById('loginemFormContainer').style.display = 'flex';
+            </script>
+        <?php endif; ?>
 
-        <form id="loginForm" action="procesar_login.php" method="POST"">
+        <form id="loginForm" action="procesar_login.php" method="POST">
             <div class="mb-3">
                 <label for="email" class="form-label">Correo Electrónico</label>
                 <input type="email" class="form-control" id="email" name="email" required>
@@ -85,12 +88,11 @@ session_start();
                 <input type="cargo" class="form-control" id="cargo" name="cargo" readonly>
             </div>
             <div class="mb-3 text-end">
-            <a href="#" onclick="showResetForm()" class="text-muted">¿Olvidaste tu contraseña?</a>
+                <a href="#" onclick="showResetForm()" class="text-muted">¿Olvidaste tu contraseña?</a>
             </div>
             <div class="d-flex justify-content-center">
                 <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
             </div>
-            
         </form>
     </div>
 </div>
@@ -100,7 +102,7 @@ session_start();
 
     <!-- Aquí inicia el Contenedor del formulario de inicio de sesión -->
     <?php if (!isset($_SESSION['user_name'])): ?>
-<div class="login-overlay" id="loginFormContainer">
+<div class="login-overlay" id="loginFormContainer" style="display: none;">
     <div class="login-form-container">
         <button class="close-btn" id="closeBtn">&times;</button>
         <h2>Iniciar Sesión</h2>
