@@ -33,6 +33,9 @@ session_start();
                     <?php else: ?>
                         <img src="img/login.png" alt="User Icon" width="40" height="40" class="me-2">
                         <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
+                        <div class="vertical-divider"></div>
+                        <img src="img/login2.png" alt="User Icon" width="40" height="40" class="me-2">
+                        <button type="button" class="btn btn-primary" onclick="showLoginFormem()">Inicia sesión Empleados</button>
                     <?php endif; ?>
                     <div class="vertical-divider"></div>
                     <button type="button" class="btn" width="40" height="40">
