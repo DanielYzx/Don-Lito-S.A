@@ -65,13 +65,9 @@ session_start();
 
         <!-- Mostrar mensaje de error si existe -->
         <?php if (isset($_GET['error'])): ?>
-            <div id="errorMessage" class="alert alert-danger">
-                <?php echo htmlspecialchars($_GET['error']); ?>
+            <div id="errorMessageem" class="alert alert-danger">
+                <?php echo htmlspecialchars($_GET['erroremS']); ?>
             </div>
-            <script>
-                // Mostrar el formulario si hay un error
-                document.getElementById('loginemFormContainer').style.display = 'flex';
-            </script>
         <?php endif; ?>
 
         <form id="loginForm" action="procesar_login.php" method="POST">
@@ -352,6 +348,7 @@ if ($result->num_rows > 0) {
 
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="validacionesformularios.js"></script>
+    <script src="empleados.js"></script>
    <script src="scroll.js"></script>    
    <script>
 </script>

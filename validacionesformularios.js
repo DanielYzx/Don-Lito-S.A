@@ -1,6 +1,5 @@
 
 
-
 function showLoginForm() {
     var loginFormContainer = document.getElementById('loginFormContainer');
     loginFormContainer.style.display = 'block';  // Mostrar el formulario de login
