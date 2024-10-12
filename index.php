@@ -56,6 +56,46 @@ session_start();
     </nav>
 
     <div class="main-content">
+        <!-- Aquí inicia el Contenedor del formulario de inicio de sesión empleados-->
+    <?php if (!isset($_SESSION['user_name'])): ?>
+<div class="login-overlay" id="loginemFormContainer">
+    <div class="login-form-container">
+        <button class="close-btn" id="closeBtnem">&times;</button>
+        <h2>Iniciar Sesión</h2>
+
+
+        <!-- Mostrar mensaje de error si existe -->
+<?php if (isset($_GET['error'])): ?>
+    <div id="errorMessage" class="alert alert-danger" >
+        <?php echo htmlspecialchars($_GET['error']); ?>
+    </div>
+<?php endif; ?>
+
+        <form id="loginForm" action="procesar_login.php" method="POST"">
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="cargo" class="form-label">Cargo</label>
+                <input type="cargo" class="form-control" id="cargo" name="cargo" readonly>
+            </div>
+            <div class="mb-3 text-end">
+            <a href="#" onclick="showResetForm()" class="text-muted">¿Olvidaste tu contraseña?</a>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            </div>
+            
+        </form>
+    </div>
+</div>
+<?php endif; ?>
+ <!-- Aquí termina el Contenedor del formulario de inicio de sesión empleados-->
    
 
     <!-- Aquí inicia el Contenedor del formulario de inicio de sesión -->
