@@ -184,6 +184,8 @@ document.querySelectorAll('.agregar-carrito-btn').forEach(function(button) {
         }
     });
 });
+
+
 </script>
 
 

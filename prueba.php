@@ -35,9 +35,9 @@ session_start();
                         <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
                     <?php endif; ?>
                     <div class="vertical-divider"></div>
-                    <button type="button" class="btn" width="40" height="40">
+                    <button type="button" class="btn" onclick="window.location.href='vercarrito.php';"width="40" height="40";>
                         <img src="img/carrito.png" alt="Carrito Icon">
-                    </button>
+                        </button>
                     <span>$ 0.00</span>
                 </div>
                 <div class="col-12 col-md-6 order-md-1">
@@ -280,23 +280,29 @@ if ($categoria_id > 0) {
             echo '<div class="productos-container">';
 
             while ($producto = $result->fetch_assoc()) {
-                // Mostrar producto en una tarjeta personalizada
-                echo '<div class="card-product">';
-                echo '<div class="card-product-img">';
-                echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">'; // Cambia la ruta de la imagen si es necesario
-                echo '</div>';
-                echo '<div class="card-product-body">';
-                echo '<h2 class="card-product-title">' . htmlspecialchars($producto["nombre"]) . '</h2>';
-                echo '<p class="card-product-price">Precio: $' . htmlspecialchars($producto["precio"]) . '</p>';
-                echo '<p class="card-product-description">' . htmlspecialchars($producto["descripción"]) . '</p>';
-                echo '<p class="card-product-existencias">Existencias: ' . htmlspecialchars($producto["cantidad_disponible"]) . '</p>';
+                 // Mostrar producto en una tarjeta personalizada
+            echo '<div class="card-product">';
+            echo '<div class="card-product-img">';
+            echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">'; // Cambia la ruta de la imagen si es necesario
+            echo '</div>';
+            echo '<div class="card-product-body">';
+            echo '<h2 class="card-product-title">' . $producto["nombre"] . '</h2>';
+            echo '<p class="card-product-price">Precio: $' . $producto["precio"] . '</p>';
+            echo '<p class="card-product-description">' . $producto["descripción"] . '</p>';
+            echo '<p class="card-product-existencias">Existencias: ' . $producto["cantidad_disponible"] . '</p>';
 
-                // Sección de cantidad
-                echo '<div class="producto-cantidad">';
-                echo '<button class="cantidad-btn restar"'. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .'>-</button>';
-                echo '<input type="number" value="1" min="1" class="cantidad-input" data-producto-id="' . htmlspecialchars($producto["id"]) . '" data-disponible="' . htmlspecialchars($producto["cantidad_disponible"]) . '" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . '>';
-                echo '<button class="cantidad-btn sumar"'. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .'>+</button>';
-                echo '</div>';
+            // Sección de cantidad
+            echo '<div class="producto-cantidad">';
+            echo '<button class="cantidad-btn restar">-</button>';
+            echo '<input type="number" value="1" min="1" class="cantidad-input" data-producto-id="' . $producto["id"] . '" data-disponible="' . $producto["cantidad_disponible"] . '">';
+            echo '<button class="cantidad-btn sumar">+</button>';
+            echo '</div>';
+
+            // Botones de cancelar y actualizar ocultos
+            echo '<div class="opciones-cantidad" style="display:none;">';
+            echo '<button class="btn-cancelar-cambio"><img src="img/cancelarcarrito.png" alt="Cancelar" style="width: 20px; height: 20px;"></button>';
+            echo '<button class="btn-actualizar-cambio"><img src="img/actualizarcarrito.png" alt="Actualizar" style="width: 20px; height: 20px;"></button>';
+            echo '</div>';
 
                 // Botón de agregar al carrito o eliminar del carrito
                 //echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" '. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
@@ -337,15 +343,15 @@ $conexion->close();
 <script src="js/bootstrap.bundle.min.js"></script>
 <script src="scroll.js"></script>
 <script src="validacionesformularios.js"></script>
+<script src="validacionesproductos.js"></script>
 <script>
-
-
-
-    function handleAddToCart(event, button) {
+function handleAddToCart(event, button) {
     const img = button.querySelector('img');
     const productId = button.getAttribute('data-producto-id');
+    const input = button.parentNode.querySelector('.cantidad-input');
+    const cantidad = parseInt(input.value);
 
-    // Aquí podrías verificar si el usuario está logueado desde el frontend, por ejemplo, con una variable de sesión
+    // Aquí podrías verificar si el usuario está logueado desde el frontend
     const isLoggedIn = <?php echo json_encode(usuarioLogueado()); ?>; // Convertir el valor de PHP a JS
 
     if (!isLoggedIn) {
@@ -354,26 +360,40 @@ $conexion->close();
         return;
     }
 
-    // Si está logueado, proceder con agregar/eliminar del carrito
-    const input = button.parentNode.querySelector('.cantidad-input');
-    const cantidad = parseInt(input.value);
+    // Determinar la acción (agregar o eliminar del carrito)
+    const action = img.src.includes('agregarcarrito.png') ? 'add' : 'remove';
 
-    if (img.src.includes('agregarcarrito.png')) {
-        img.src = 'img/eliminarcarrito.png';
-        img.alt = 'Eliminar del carrito';
-        button.style.backgroundColor = '#dc3545';
-        // Aquí agregarías el código para añadir el producto al carrito (AJAX, redirección, etc.)
-    } else {
-        const confirmacion = confirm("¿Deseas eliminar este producto del carrito?");
-        if (confirmacion) {
-            img.src = 'img/agregarcarrito.png';
-            img.alt = 'Añadir al carrito';
-            button.style.backgroundColor = '#28a745';
-            // Aquí el código para eliminar el producto del carrito
+    // Hacer una solicitud AJAX
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'agregar_al_carrito.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                if (action === 'add') {
+                    img.src = 'img/eliminarcarrito.png';
+                    img.alt = 'Eliminar del carrito';
+                    button.style.backgroundColor = '#dc3545';
+                    alert('Producto añadido al carrito.');
+                } else {
+                    img.src = 'img/agregarcarrito.png';
+                    img.alt = 'Añadir al carrito';
+                    button.style.backgroundColor = '#28a745';
+                    alert('Producto eliminado del carrito.');
+                }
+            } else {
+                alert('Error: ' + response.error);
+            }
+        } else {
+            alert('Error al procesar la solicitud.');
         }
-    }
-}
+    };
 
+    // Enviar solo producto_id y cantidad al servidor
+    xhr.send(`producto_id=${productId}&cantidad=${cantidad}&action=${action}`);
+}
 </script>
+
 </body>
 </html>
