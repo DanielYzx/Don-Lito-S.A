@@ -40,8 +40,16 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
         echo '<td>' . htmlspecialchars($nombre) . '</td>';
         echo '<td>' . htmlspecialchars($detalle['descripcion']) . '</td>';
         echo '<td>
-                <input type="number" value="' . $detalle['cantidad'] . '" min="1" class="cantidad-input" data-producto-id="' . $producto_id . '">
-              </td>';
+                <div class="cantidad-container">
+                    <input type="number" value="' . $detalle['cantidad'] . '" min="1" class="cantidad-input" data-producto-id="' . $producto_id . '" onchange="mostrarBotonActualizar(' . $producto_id . ')">
+                    
+                    <button class="btn-cancelar" data-producto-id="' . $producto_id . '" style="display:none;" onclick="cancelarCambio(' . $producto_id . ', ' . $detalle['cantidad'] .')">
+                        <img src="img/cancelarcarrito.png" alt="Actualizar" style="width: 15px; height: 15px;">
+                    </button>
+                    <button class="btn-actualizar" data-producto-id="' . $producto_id . '" style="display:none;" onclick="actualizarCantidad(' . $producto_id . ')">
+                        <img src="img/actualizarcarrito.png" alt="Actualizar" style="width: 15px; height: 15px;">
+                    </button>
+                </div>';
         echo '<td>$' . number_format($detalle['precio'], 2) . '</td>';
         echo '<td>$' . number_format($subtotal, 2) . '</td>';
         echo '<td>
@@ -59,14 +67,12 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
 } else {
     echo '<p>No hay productos en el carrito.</p>';
 }
-
 ?>
 
-
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script>
 function eliminarProducto(productoId) {
     if (confirm("¿Estás seguro de que quieres eliminar este producto del carrito?")) {
-        // Hacer una solicitud AJAX para eliminar el producto del carrito
         const xhr = new XMLHttpRequest();
         xhr.open('POST', 'agregar_al_carrito.php', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -74,7 +80,6 @@ function eliminarProducto(productoId) {
             if (xhr.status === 200) {
                 const response = JSON.parse(xhr.responseText);
                 if (response.success) {
-                    // Recargar la página para mostrar los cambios
                     location.reload();
                 } else {
                     alert('Error al eliminar el producto: ' + response.error);
@@ -85,9 +90,51 @@ function eliminarProducto(productoId) {
     }
 }
 
+function mostrarBotonActualizar(productoId) {
+    const botonActualizar = document.querySelector(`.btn-actualizar[data-producto-id="${productoId}"]`);
+    const botonCancelar = document.querySelector(`.btn-cancelar[data-producto-id="${productoId}"]`);
+    botonActualizar.style.display = 'inline-block'; // Mostrar el botón de actualización
+    botonCancelar.style.display = 'inline-block'; // Mostrar el botón de cancelar
+}
+
+function cancelarCambio(productoId, cantidadAnterior) {
+    const inputCantidad = document.querySelector(`.cantidad-input[data-producto-id="${productoId}"]`);
+    inputCantidad.value = cantidadAnterior; // Restablece el valor al anterior
+    ocultarBotones(productoId); // Ocultar los botones de actualizar y cancelar
+}
+
+function ocultarBotones(productoId) {
+    const botonActualizar = document.querySelector(`.btn-actualizar[data-producto-id="${productoId}"]`);
+    const botonCancelar = document.querySelector(`.btn-cancelar[data-producto-id="${productoId}"]`);
+    botonActualizar.style.display = 'none';
+    botonCancelar.style.display = 'none';
+}
+
+function actualizarCantidad(productoId) {
+    const inputCantidad = document.querySelector(`.cantidad-input[data-producto-id="${productoId}"]`);
+    const nuevaCantidad = parseInt(inputCantidad.value);
+
+    if (nuevaCantidad > 0) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'agregar_al_carrito.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('Error al actualizar la cantidad: ' + response.error);
+                }
+            }
+        };
+        xhr.send(`producto_id=${productoId}&action=update&cantidad=${nuevaCantidad}`);
+    } else {
+        alert("La cantidad debe ser mayor que cero.");
+    }
+}
 
 function irAComprar() {
-    // Aquí puedes redirigir a la página de pago o continuar con la compra
     window.location.href = 'pagina_pago.php'; // Cambia esto según la ruta de tu página de pago
 }
 </script>
@@ -126,6 +173,40 @@ button {
     background-color: #dc3545;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
+}
+
+.cantidad-container {
+    display: flex;
+    align-items: center;
+}
+
+.cantidad-input {
+    width: 60px;
+    margin-right: 10px; /* Espacio entre el input y el botón */
+}
+
+.btn-actualizar {
+    background-color: #4CAF50; /* Color de fondo */
+    color: white; /* Color del texto */
+    border: none; /* Sin borde */
+    border-radius: 25px; /* Bordes redondeados */
+    padding: 5px 15px; /* Espaciado interno */
+    cursor: pointer; /* Cambia el cursor al pasar el ratón */
+    display: flex; /* Para centrar la imagen dentro del botón */
+    align-items: center; /* Alinea verticalmente */
+    justify-content: center; /* Alinea horizontalmente */
+}
+
+.btn-cancelar {
+    background-color: #f0ad4e; /* Color de fondo para cancelar */
+    color: white; /* Color del texto */
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes redondeados */
+    padding: 5px 10px; /* Espaciado interno */
+    cursor: pointer; /* Cambia el cursor al pasar el ratón */
 }
 </style>
+
+
+

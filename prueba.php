@@ -35,7 +35,7 @@ session_start();
                         <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
                     <?php endif; ?>
                     <div class="vertical-divider"></div>
-                    <button type="button" class="btn" onclick="window.location.href='vercarrito.php';"width="40" height="40";>
+                    <button type="button" class="btn" onclick="vercarrito.php;"width="40" height="40";>
                         <img src="img/carrito.png" alt="Carrito Icon">
                         </button>
                     <span>$ 0.00</span>
@@ -53,6 +53,211 @@ session_start();
     </nav>
 
     <div class="main-content">
+
+    <div class="carrito-overlay" id="carritoContainer" style="display: none;">
+    <div class="carrito-form-container">
+        <button class="close-btn" id="closeCarritoBtn">&times;</button>
+        <!-- Aquí va el contenido de tu carrito -->
+        <?php
+include 'conexion.php'; // Asegúrate de incluir la conexión a la base de datos si la necesitas
+
+// Verifica si hay productos en el carrito
+if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
+    // Contador para el total
+    $total = 0;
+
+    echo '<div class="carrito-container">';
+    echo '<h1>Tu Carrito de Compras</h1>';
+    echo '<table>';
+    echo '<tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Total</th>
+            <th>Acciones</th>
+          </tr>';
+
+    // Recorrer los productos en el carrito
+    foreach ($_SESSION['carrito'] as $producto_id => $detalle) {
+        // Consulta para obtener el nombre del producto desde la base de datos
+        $sql = "SELECT nombre FROM productos WHERE id = ?";
+        if ($stmt = $conexion->prepare($sql)) {
+            $stmt->bind_param('i', $producto_id);
+            $stmt->execute();
+            $stmt->bind_result($nombre);
+            $stmt->fetch();
+            $stmt->close();
+        }
+
+        // Calcular el total del producto
+        $subtotal = $detalle['cantidad'] * $detalle['precio'];
+        $total += $subtotal;
+
+        // Mostrar producto en la tabla
+        echo '<tr>';
+        echo '<td>' . htmlspecialchars($nombre) . '</td>';
+        echo '<td>
+                <div class="cantidad-container">
+                    <input type="number" value="' . $detalle['cantidad'] . '" min="1" class="cantidad-input" data-producto-id="' . $producto_id . '" onchange="mostrarBotonActualizar(' . $producto_id . ')">
+                    
+                    <button class="btn-cancelar" data-producto-id="' . $producto_id . '" style="display:none;" onclick="cancelarCambio(' . $producto_id . ', ' . $detalle['cantidad'] .')">
+                        <img src="img/cancelarcarrito.png" alt="Actualizar" style="width: 15px; height: 15px;">
+                    </button>
+                    <button class="btn-actualizar" data-producto-id="' . $producto_id . '" style="display:none;" onclick="actualizarCantidad(' . $producto_id . ')">
+                        <img src="img/actualizarcarrito.png" alt="Actualizar" style="width: 15px; height: 15px;">
+                    </button>
+                </div>';
+        echo '<td>$' . number_format($detalle['precio'], 2) . '</td>';
+        echo '<td>$' . number_format($subtotal, 2) . '</td>';
+        echo '<td>
+                <button class="btn-eliminar" onclick="eliminarProducto(' . $producto_id . ')">Eliminar</button>
+              </td>';
+        echo '</tr>';
+    }
+
+    echo '</table>';
+    echo '<h2>Total: $' . number_format($total, 2) . '</h2>';
+    echo '<button onclick="irAComprar()">Finalizar Compra</button>'; // O un botón para continuar comprando
+
+    echo '</div>'; // Cerrar contenedor de carrito
+
+} else {
+    echo '<p>No hay productos en el carrito.</p>';
+}
+?>
+    </div>
+ </div>
+ <script>
+function eliminarProducto(productoId) {
+    if (confirm("¿Estás seguro de que quieres eliminar este producto del carrito?")) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'agregar_al_carrito.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('Error al eliminar el producto: ' + response.error);
+                }
+            }
+        };
+        xhr.send(`producto_id=${productoId}&action=remove`);
+    }
+}
+
+function mostrarBotonActualizar(productoId) {
+    const botonActualizar = document.querySelector(`.btn-actualizar[data-producto-id="${productoId}"]`);
+    const botonCancelar = document.querySelector(`.btn-cancelar[data-producto-id="${productoId}"]`);
+    botonActualizar.style.display = 'inline-block'; // Mostrar el botón de actualización
+    botonCancelar.style.display = 'inline-block'; // Mostrar el botón de cancelar
+}
+
+function cancelarCambio(productoId, cantidadAnterior) {
+    const inputCantidad = document.querySelector(`.cantidad-input[data-producto-id="${productoId}"]`);
+    inputCantidad.value = cantidadAnterior; // Restablece el valor al anterior
+    ocultarBotones(productoId); // Ocultar los botones de actualizar y cancelar
+}
+
+function ocultarBotones(productoId) {
+    const botonActualizar = document.querySelector(`.btn-actualizar[data-producto-id="${productoId}"]`);
+    const botonCancelar = document.querySelector(`.btn-cancelar[data-producto-id="${productoId}"]`);
+    botonActualizar.style.display = 'none';
+    botonCancelar.style.display = 'none';
+}
+
+function actualizarCantidad(productoId) {
+    const inputCantidad = document.querySelector(`.cantidad-input[data-producto-id="${productoId}"]`);
+    const nuevaCantidad = parseInt(inputCantidad.value);
+
+    if (nuevaCantidad > 0) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'agregar_al_carrito.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('Error al actualizar la cantidad: ' + response.error);
+                }
+            }
+        };
+        xhr.send(`producto_id=${productoId}&action=update&cantidad=${nuevaCantidad}`);
+    } else {
+        alert("La cantidad debe ser mayor que cero.");
+    }
+}
+
+function irAComprar() {
+    window.location.href = 'pagina_pago.php'; // Cambia esto según la ruta de tu página de pago
+}
+
+function showCarrito() {
+    var carritoContainer = document.getElementById('carritoContainer');
+    carritoContainer.style.display = 'block';
+    document.body.classList.add('no-scroll'); // Para evitar desplazamiento en la página
+}
+
+document.getElementById("closeCarritoBtn").addEventListener("click", function() {
+    document.getElementById("carritoContainer").style.display = "none";
+    document.body.classList.remove('no-scroll'); // Volver a permitir el desplazamiento
+});
+
+</script>
+
+<style>
+    /* Estilos para el overlay del carrito */
+.carrito-overlay {
+    position: fixed;
+    top: 110px; /* Ajusta según la altura del navbar */
+    right: 0;
+    width: 65%;
+    height: 82%;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Contenedor del formulario del carrito */
+.carrito-form-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%; /* Ajusta el ancho para que ocupe el 100% del contenedor padre */
+    max-width: 700px; /* Incrementa el ancho máximo del contenedor */
+    max-height: 98%;
+    margin: 20px; /* Añade margen alrededor del contenedor */
+    overflow-y: auto; /* Permite scroll si el contenido del carrito es muy largo */
+}
+
+
+/* Botón de cierre */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    border: none;
+    font-size: 36px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #440cdf;
+}
+
+.close-btn:hover {
+    color: #ff0000; /* Cambia el color al pasar el mouse */
+}
+.register-form-container::-webkit-scrollbar {
+    display: none;  /* Oculta el scroll en Chrome, Safari y Edge */
+}
+</style>
 
        <!-- Aquí inicia el Contenedor del formulario de inicio de sesión -->
     <?php if (!isset($_SESSION['user_name'])): ?>
