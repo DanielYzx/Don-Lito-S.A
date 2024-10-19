@@ -12,7 +12,6 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     echo '<table>';
     echo '<tr>
             <th>Producto</th>
-            <th>Descripción</th>
             <th>Cantidad</th>
             <th>Precio</th>
             <th>Total</th>
@@ -38,7 +37,6 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
         // Mostrar producto en la tabla
         echo '<tr>';
         echo '<td>' . htmlspecialchars($nombre) . '</td>';
-        echo '<td>' . htmlspecialchars($detalle['descripcion']) . '</td>';
         echo '<td>
                 <div class="cantidad-container">
                     <input type="number" value="' . $detalle['cantidad'] . '" min="1" class="cantidad-input" data-producto-id="' . $producto_id . '" onchange="mostrarBotonActualizar(' . $producto_id . ')">

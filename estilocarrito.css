@@ -1,0 +1,115 @@
+.carrito-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+button {
+    padding: 5px 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.btn-eliminar {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 10px;
+}
+
+.cantidad-container {
+    display: flex;
+    align-items: center;
+}
+
+.cantidad-input {
+    width: 60px;
+    margin-right: 10px; /* Espacio entre el input y el botón */
+}
+
+.btn-actualizar {
+    background-color: #4CAF50; /* Color de fondo */
+    color: white; /* Color del texto */
+    border: none; /* Sin borde */
+    border-radius: 25px; /* Bordes redondeados */
+    padding: 5px 15px; /* Espaciado interno */
+    cursor: pointer; /* Cambia el cursor al pasar el ratón */
+    display: flex; /* Para centrar la imagen dentro del botón */
+    align-items: center; /* Alinea verticalmente */
+    justify-content: center; /* Alinea horizontalmente */
+}
+
+.btn-cancelar {
+    background-color: #f0ad4e; /* Color de fondo para cancelar */
+    color: white; /* Color del texto */
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes redondeados */
+    padding: 5px 10px; /* Espaciado interno */
+    cursor: pointer; /* Cambia el cursor al pasar el ratón */
+}
+
+ /* Estilos para el overlay del carrito */
+ .carrito-overlay {
+    position: fixed;
+    top: 110px; /* Ajusta según la altura del navbar */
+    right: 0;
+    width: 55%;
+    height: 82%;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Contenedor del formulario del carrito */
+.carrito-form-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%; /* Ajusta el ancho para que ocupe el 100% del contenedor padre */
+    max-width: 700px; /* Incrementa el ancho máximo del contenedor */
+    max-height: 98%;
+    margin: 20px; /* Añade margen alrededor del contenedor */
+    overflow-y: auto; /* Permite scroll si el contenido del carrito es muy largo */
+}
+
+
+/* Botón de cierre */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    border: none;
+    font-size: 36px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #440cdf;
+}
+
+.close-btn:hover {
+    color: #ff0000; /* Cambia el color al pasar el mouse */
+}
+.register-form-container::-webkit-scrollbar {
+    display: none;  /* Oculta el scroll en Chrome, Safari y Edge */
+}
