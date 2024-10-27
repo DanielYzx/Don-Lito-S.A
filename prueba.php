@@ -2,6 +2,9 @@
 <?php
 // Inicia la sesión
 session_start();
+
+$_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actual
+
 ?>
 
 <!DOCTYPE html>
@@ -36,9 +39,9 @@ session_start();
                         <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
                     <?php endif; ?>
                     <div class="vertical-divider"></div>
-                    <button type="button" class="btn" onclick="showCarrito();"width="40" height="40";>
-                        <img src="img/carrito.png" alt="Carrito Icon">
-                        </button>
+                    <button type="button" class="btn" onclick="window.location.href='vercarrito.php';" width="40" height="40">
+               <img src="img/carrito.png" alt="Carrito Icon">
+                </button>
                     <span>$ 0.00</span>
                 </div>
                 <div class="col-12 col-md-6 order-md-1">
@@ -421,6 +424,8 @@ $conexion->close();
 <script src="validacionesproductos.js"></script>
 <script src="validacioncarrito.js"></script>
 <script>
+
+// Función para manejar añadir o eliminar del carrito
 function handleAddToCart(event, button) {
     const img = button.querySelector('img');
     const productId = button.getAttribute('data-producto-id');
@@ -448,11 +453,17 @@ function handleAddToCart(event, button) {
                     img.alt = 'Eliminar del carrito';
                     button.style.backgroundColor = '#dc3545';
                     alert('Producto añadido al carrito.');
+
+                    // Guardar estado en localStorage
+                    guardarEstadoBotonEnLocalStorage(productId, 'added');
                 } else {
                     img.src = 'img/agregarcarrito.png';
                     img.alt = 'Añadir al carrito';
                     button.style.backgroundColor = '#28a745';
                     alert('Producto eliminado del carrito.');
+
+                    // Guardar estado en localStorage
+                    guardarEstadoBotonEnLocalStorage(productId, 'removed');
                 }
             } else {
                 alert('Error: ' + response.error);
@@ -464,6 +475,30 @@ function handleAddToCart(event, button) {
 
     xhr.send(`producto_id=${productId}&cantidad=${cantidad}&action=${action}`);
 }
+
+// Cargar el estado del botón al inicializar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Obtener todos los botones de añadir al carrito
+    const buttons = document.querySelectorAll('.boton-agregar-carrito'); // Asegúrate de que esta clase sea correcta
+
+    buttons.forEach(function(button) {
+        const productId = button.getAttribute('data-producto-id');
+        const estadoBoton = localStorage.getItem(`estado_boton_${productId}`);
+
+        if (estadoBoton === 'added') {
+            const img = button.querySelector('img');
+            img.src = 'img/eliminarcarrito.png';
+            img.alt = 'Eliminar del carrito';
+            button.style.backgroundColor = '#dc3545';
+        } else if (estadoBoton === 'removed') {
+            const img = button.querySelector('img');
+            img.src = 'img/agregarcarrito.png';
+            img.alt = 'Añadir al carrito';
+            button.style.backgroundColor = '#28a745';
+        }
+    });
+});
+
 </script>
 
 </body>

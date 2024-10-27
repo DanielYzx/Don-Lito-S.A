@@ -1,19 +1,33 @@
 // Inicializar la cantidad guardada
-let cantidadAnterior = {};
+let cantidadAnterior = JSON.parse(localStorage.getItem('cantidadAnterior')) || {};
 
-// Mostrar los botones de "Cancelar" y "Actualizar" al cambiar la cantidad manualmente o con los botones
+// Función para guardar en localStorage
+function guardarCantidadEnLocalStorage(productoId, cantidad) {
+    cantidadAnterior[productoId] = cantidad;
+    localStorage.setItem('cantidadAnterior', JSON.stringify(cantidadAnterior));
+}
+
+// Función para guardar el estado del botón en localStorage
+function guardarEstadoBotonEnLocalStorage(productoId, estado) {
+    localStorage.setItem(`estado_boton_${productoId}`, estado);
+}
+
+// Mostrar las cantidades guardadas en los inputs
 document.querySelectorAll('.cantidad-input').forEach(function(input) {
-    input.addEventListener('input', function() {
-        const productoId = input.getAttribute('data-producto-id');
+    const productoId = input.getAttribute('data-producto-id');
 
+    // Cargar cantidad desde localStorage si existe
+    if (cantidadAnterior[productoId]) {
+        input.value = cantidadAnterior[productoId];
+    }
+
+    input.addEventListener('input', function() {
         // Validar que el valor no sea menor que 1
         if (parseInt(input.value) < 1) {
             input.value = 1; // Establece el valor a 1 si es menor que 1
         }
 
-        if (!cantidadAnterior[productoId]) {
-            cantidadAnterior[productoId] = input.value;
-        }
+        guardarCantidadEnLocalStorage(productoId, input.value);
 
         const opciones = this.parentNode.nextElementSibling;
         opciones.style.display = "flex";
@@ -51,6 +65,9 @@ document.querySelectorAll('.cantidad-btn').forEach(function(button) {
         } else if (this.classList.contains('sumar')) {
             input.value = value + 1;
         }
+
+        // Guardar en localStorage
+        guardarCantidadEnLocalStorage(productoId, input.value);
     });
 });
 
@@ -84,15 +101,51 @@ document.querySelectorAll('.btn-actualizar-cambio').forEach(function(btn) {
             return; // Salir de la función
         }
 
-        cantidadAnterior[productoId] = cantidad; // Guardar la nueva cantidad
-        this.parentNode.style.display = 'none'; // Ocultar opciones
-
+        // Guardar en localStorage
+        guardarCantidadEnLocalStorage(productoId, cantidad);
+        // Aquí puedes añadir lógica adicional para actualizar el carrito en el servidor
+        // Ejemplo de actualización en el servidor (puedes modificar esto según tus necesidades)
+        actualizarCarritoEnServidor(productoId, cantidad);
+        
+        // Ocultar opciones después de actualizar
+        this.parentNode.style.display = 'none';
+        
         // Rehabilitar el botón de agregar/eliminar
         const botonCarrito = this.parentNode.nextElementSibling;
         botonCarrito.disabled = false;
         botonCarrito.classList.remove('btn-deshabilitado');
     });
 });
+
+// Función para actualizar el carrito en el servidor (puedes adaptarlo según tu backend)
+function actualizarCarritoEnServidor(productoId, cantidad) {
+    // Implementa aquí la lógica para enviar la actualización al servidor
+    console.log(`Actualizando producto ${productoId} a la cantidad ${cantidad}`);
+}
+
+// Cargar el estado del botón al inicializar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Obtener todos los botones de añadir al carrito
+    const buttons = document.querySelectorAll('.agregar-carrito-btn'); // Asegúrate de que esta clase sea correcta
+
+    buttons.forEach(function(button) {
+        const productId = button.getAttribute('data-producto-id');
+        const estadoBoton = localStorage.getItem(`estado_boton_${productId}`);
+
+        if (estadoBoton === 'added') {
+            const img = button.querySelector('img');
+            img.src = 'img/eliminarcarrito.png';
+            img.alt = 'Eliminar del carrito';
+            button.style.backgroundColor = '#dc3545';
+        } else if (estadoBoton === 'removed') {
+            const img = button.querySelector('img');
+            img.src = 'img/agregarcarrito.png';
+            img.alt = 'Añadir al carrito';
+            button.style.backgroundColor = '#28a745';
+        }
+    });
+});
+
 
 
 
