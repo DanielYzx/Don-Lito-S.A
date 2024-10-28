@@ -327,76 +327,56 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
 <?php
 include 'conexion.php';
 
-
-// Verificar si el usuario está logueado
 function usuarioLogueado() {
-    return isset($_SESSION['user_id']); // O el nombre de la variable de sesión que uses para almacenar el ID del usuario
+    return isset($_SESSION['user_id']);
 }
 
-// Obtener el ID de la categoría desde la URL y asegurarse de que es un número entero
 $categoria_id = isset($_GET['categoria_id']) ? (int)$_GET['categoria_id'] : 0;
 
 if ($categoria_id > 0) {
-    // Preparar la consulta SQL
     $sql = "SELECT id, nombre, precio, descripción, imagen, cantidad_disponible 
             FROM productos 
             WHERE categoria_id = ?";
 
-    // Preparar la sentencia
     if ($stmt = $conexion->prepare($sql)) {
-        // Vincular el parámetro (sólo números enteros)
         $stmt->bind_param('i', $categoria_id);
-
-        // Ejecutar la sentencia
         $stmt->execute();
-
-        // Obtener los resultados
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            // Contenedor de productos
             echo '<div class="productos-container">';
 
             while ($producto = $result->fetch_assoc()) {
-                 // Mostrar producto en una tarjeta personalizada
-            echo '<div class="card-product">';
-            echo '<div class="card-product-img">';
-            echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">'; // Cambia la ruta de la imagen si es necesario
-            echo '</div>';
-            echo '<div class="card-product-body">';
-            echo '<h2 class="card-product-title">' . $producto["nombre"] . '</h2>';
-            echo '<p class="card-product-price">Precio: $' . $producto["precio"] . '</p>';
-            echo '<p class="card-product-description">' . $producto["descripción"] . '</p>';
-            echo '<p class="card-product-existencias">Existencias: ' . $producto["cantidad_disponible"] . '</p>';
-
-            // Sección de cantidad
-            echo '<div class="producto-cantidad">';
-            echo '<button class="cantidad-btn restar">-</button>';
-            echo '<input type="number" value="1" min="1" class="cantidad-input" data-producto-id="' . $producto["id"] . '" data-disponible="' . $producto["cantidad_disponible"] . '">';
-            echo '<button class="cantidad-btn sumar">+</button>';
-            echo '</div>';
-
-            // Botones de cancelar y actualizar ocultos
-            echo '<div class="opciones-cantidad" style="display:none;">';
-            echo '<button class="btn-cancelar-cambio"><img src="img/cancelarcarrito.png" alt="Cancelar" style="width: 20px; height: 20px;"></button>';
-            echo '<button class="btn-actualizar-cambio"><img src="img/actualizarcarrito.png" alt="Actualizar" style="width: 20px; height: 20px;"></button>';
-            echo '</div>';
-
-                // Botón de agregar al carrito o eliminar del carrito
-                //echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" '. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
-                //echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                echo '<div class="card-product">';
+                echo '<div class="card-product-img">';
+                echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">';
+                echo '</div>';
+                echo '<div class="card-product-body">';
+                echo '<h2 class="card-product-title">' . htmlspecialchars($producto["nombre"]) . '</h2>';
+                echo '<p class="card-product-price">Precio: $' . htmlspecialchars($producto["precio"]) . '</p>';
+                echo '<p class="card-product-description">' . htmlspecialchars($producto["descripción"]) . '</p>';
+                echo '<p class="card-product-existencias">Existencias: ' . htmlspecialchars($producto["cantidad_disponible"]) . '</p>';
+                
                 if (usuarioLogueado()) {
-                    // Botón para agregar o eliminar del carrito
-                    echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" '. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
-                    echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                    // Determina si el producto está en el carrito
+                    $enCarrito = isset($_SESSION['carrito'][$producto["id"]]);
+                    
+                    // Cambia el icono según el estado en el carrito
+                    if ($enCarrito) {
+                        echo '<button class="agregar-carrito-btn" onclick="eliminarDelCarrito(event, this)" data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                        echo '<img src="img/eliminarcarrito.png" alt="Eliminar del carrito" style="width: 25px; height: 25px;"></button>';
+                    } else {
+                        echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                        echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                    }
                 } else {
-                    // Si no está logueado, mostramos el botón para redirigir al formulario de login
-                   // echo '<button class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>';
-                    echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" '. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                    echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
                     echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
                 }
+                
                 echo '</div>'; // Cerrar el cuerpo de la tarjeta
                 echo '</div>'; // Cerrar la tarjeta del producto
+                
             }
 
             echo '</div>'; // Cerrar el contenedor de productos
@@ -404,7 +384,6 @@ if ($categoria_id > 0) {
             echo '<p>No hay productos disponibles en esta categoría.</p>';
         }
 
-        // Cerrar la sentencia
         $stmt->close();
     } else {
         echo '<p>Error en la consulta: ' . $conexion->error . '</p>';
@@ -413,7 +392,6 @@ if ($categoria_id > 0) {
     echo '<p>Categoría no válida.</p>';
 }
 
-// Cerrar la conexión
 $conexion->close();
 ?>
 </div>
@@ -429,18 +407,12 @@ $conexion->close();
 function handleAddToCart(event, button) {
     const img = button.querySelector('img');
     const productId = button.getAttribute('data-producto-id');
-    const input = button.parentNode.querySelector('.cantidad-input');
-    const cantidad = parseInt(input.value);
-
     const isLoggedIn = <?php echo json_encode(usuarioLogueado()); ?>;
-
     if (!isLoggedIn) {
         showLoginForm();
         return;
     }
-
     const action = img.src.includes('agregarcarrito.png') ? 'add' : 'remove';
-
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'agregar_al_carrito.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -453,17 +425,11 @@ function handleAddToCart(event, button) {
                     img.alt = 'Eliminar del carrito';
                     button.style.backgroundColor = '#dc3545';
                     alert('Producto añadido al carrito.');
-
-                    // Guardar estado en localStorage
-                    guardarEstadoBotonEnLocalStorage(productId, 'added');
                 } else {
                     img.src = 'img/agregarcarrito.png';
                     img.alt = 'Añadir al carrito';
                     button.style.backgroundColor = '#28a745';
                     alert('Producto eliminado del carrito.');
-
-                    // Guardar estado en localStorage
-                    guardarEstadoBotonEnLocalStorage(productId, 'removed');
                 }
             } else {
                 alert('Error: ' + response.error);
@@ -472,34 +438,12 @@ function handleAddToCart(event, button) {
             alert('Error al procesar la solicitud.');
         }
     };
-
-    xhr.send(`producto_id=${productId}&cantidad=${cantidad}&action=${action}`);
+    const postData = `producto_id=${productId}&action=${action}` + (action === 'add' ? '&cantidad=1' : '');
+    xhr.send(postData);
 }
 
-// Cargar el estado del botón al inicializar la página
-document.addEventListener('DOMContentLoaded', function() {
-    // Obtener todos los botones de añadir al carrito
-    const buttons = document.querySelectorAll('.boton-agregar-carrito'); // Asegúrate de que esta clase sea correcta
-
-    buttons.forEach(function(button) {
-        const productId = button.getAttribute('data-producto-id');
-        const estadoBoton = localStorage.getItem(`estado_boton_${productId}`);
-
-        if (estadoBoton === 'added') {
-            const img = button.querySelector('img');
-            img.src = 'img/eliminarcarrito.png';
-            img.alt = 'Eliminar del carrito';
-            button.style.backgroundColor = '#dc3545';
-        } else if (estadoBoton === 'removed') {
-            const img = button.querySelector('img');
-            img.src = 'img/agregarcarrito.png';
-            img.alt = 'Añadir al carrito';
-            button.style.backgroundColor = '#28a745';
-        }
-    });
-});
-
 </script>
+
 
 </body>
 </html>

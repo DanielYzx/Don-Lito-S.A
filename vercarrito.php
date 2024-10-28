@@ -66,30 +66,20 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
         echo '</tr>';
     }
 
-   
-
     // Calcular el total sin IVA
-//$total_sin_iva = $total; // En este caso, el total ya es sin IVA
-// Calcular el IVA
-//$iva = $total_sin_iva * 0.13; // 13% de IVA
-// Calcular el total con IVA
-//$total_con_iva = $total_sin_iva + $iva;
+    $total_sin_iva = $total / 1.13; // Divide el total entre 1.13 para obtener el subtotal
+    // Calcular el IVA
+    $iva = $total_sin_iva * 0.13; // Calcula el 13% del subtotal
+    // Calcular el total con IVA (que sigue siendo el mismo total)
+    $total_con_iva = $total; // Este ya es el total que incluye IVA
 
-// Suponiendo que $total es el total que ya incluye IVA
-// Calcular el total sin IVA (Subtotal)
-$total_sin_iva = $total / 1.13; // Divide el total entre 1.13 para obtener el subtotal
-// Calcular el IVA
-$iva = $total_sin_iva * 0.13; // Calcula el 13% del subtotal
-// Calcular el total con IVA (que sigue siendo el mismo total)
-$total_con_iva = $total; // Este ya es el total que incluye IVA
-
-echo '</table>';
-echo '<h2 class="text-left subtotal">Subtotal: $' . number_format($total_sin_iva, 2) . '</h2>'; // Total sin IVA
-echo '<h2 class="text-left iva">IVA (13%): $' . number_format($iva, 2) . '</h2>'; // Mostrar el IVA
-echo '<h2 class="text-left total">Total a pagar: $' . number_format($total_con_iva, 2) . '</h2>'; // Total con IVA
-echo '<div class="text-left">'; // Div para alinear el botón
-echo '<button class="btn-finalizar" onclick="irAComprar()">Finalizar Compra</button>'; // Botón para continuar comprando
-echo '</div>'; // Cerrar div
+    echo '</table>';
+    echo '<h2 class="text-left subtotal">Subtotal: $' . number_format($total_sin_iva, 2) . '</h2>'; // Total sin IVA
+    echo '<h2 class="text-left iva">IVA (13%): $' . number_format($iva, 2) . '</h2>'; // Mostrar el IVA
+    echo '<h2 class="text-left total">Total a pagar: $' . number_format($total_con_iva, 2) . '</h2>'; // Total con IVA
+    echo '<div class="text-left">'; // Div para alinear el botón
+    echo '<button class="btn-finalizar" onclick="enviar()">Enviar Pedido</button>'; // Botón para continuar comprando
+    echo '</div>'; // Cerrar div
 
     echo '</div>'; // Cerrar contenedor de carrito
 
@@ -136,15 +126,14 @@ function ocultarBotones(productoId) {
     botonActualizar.style.display = 'none';
     botonCancelar.style.display = 'none';
 }
-
 function actualizarCantidad(productoId, stockMaximo) {
     const inputCantidad = document.querySelector(`.cantidad-input[data-producto-id="${productoId}"]`);
     let nuevaCantidad = parseInt(inputCantidad.value);
 
     if (nuevaCantidad > stockMaximo) {
         alert(`La cantidad ingresada supera el stock disponible. Solo hay ${stockMaximo} unidades disponibles.`);
-        nuevaCantidad = stockMaximo;
-        inputCantidad.value = stockMaximo; // Ajusta la cantidad visualmente en el campo de entrada
+        nuevaCantidad = stockMaximo; // Ajusta la cantidad visualmente en el campo de entrada
+        inputCantidad.value = stockMaximo; // Cambia la visualización
     }
 
     if (nuevaCantidad > 0) {
@@ -155,7 +144,7 @@ function actualizarCantidad(productoId, stockMaximo) {
             if (xhr.status === 200) {
                 const response = JSON.parse(xhr.responseText);
                 if (response.success) {
-                    location.reload();
+                    location.reload(); // Recargar la página para ver los cambios
                 } else {
                     alert('Error al actualizar la cantidad: ' + response.error);
                 }
@@ -166,11 +155,27 @@ function actualizarCantidad(productoId, stockMaximo) {
         alert("La cantidad debe ser mayor que cero.");
     }
 }
+function enviar() {
+    // Recoge los productos y cantidades del carrito
+    const productos = {};
+    document.querySelectorAll('.cantidad-input').forEach(input => {
+        const productoId = input.dataset.productoId;
+        const cantidad = input.value;
+        productos[productoId] = cantidad; // Guardar la cantidad por producto
+    });
 
-function irAComprar() {
-    window.location.href = 'pagina_pago.php'; // Cambia esto según la ruta de tu página de pago
+    // Convierte el objeto en una cadena de consulta
+    const queryString = Object.entries(productos)
+        .map(([id, cantidad]) => `producto_id[]=${id}&cantidad[]=${cantidad}`)
+        .join('&');
+
+    // Redirige a la página de procesamiento del pedido
+    window.location.href = `procesar_pedido.php?${queryString}`;
 }
+
 </script>
+
+
 
 <style>
 body {
