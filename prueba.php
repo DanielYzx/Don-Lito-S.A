@@ -2,6 +2,9 @@
 <?php
 // Inicia la sesión
 session_start();
+
+$_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actual
+
 ?>
 
 <!DOCTYPE html>
@@ -13,6 +16,7 @@ session_start();
     <title>Pantalla Principal</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="estilo.css">
+    <link rel="stylesheet" href="estilocarrito.css">
 </head>
 
 <body>
@@ -35,9 +39,9 @@ session_start();
                         <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
                     <?php endif; ?>
                     <div class="vertical-divider"></div>
-                    <button type="button" class="btn" onclick="window.location.href='vercarrito.php';"width="40" height="40";>
-                        <img src="img/carrito.png" alt="Carrito Icon">
-                        </button>
+                    <button type="button" class="btn" onclick="window.location.href='vercarrito.php';" width="40" height="40">
+               <img src="img/carrito.png" alt="Carrito Icon">
+                </button>
                     <span>$ 0.00</span>
                 </div>
                 <div class="col-12 col-md-6 order-md-1">
@@ -53,6 +57,80 @@ session_start();
     </nav>
 
     <div class="main-content">
+
+    <div class="carrito-overlay" id="carritoContainer" style="display: none;">
+    <div class="carrito-form-container">
+        <button class="close-btn" id="closeCarritoBtn">&times;</button>
+        <!-- Aquí va el contenido de tu carrito -->
+        <?php
+// Incluye la conexión a la base de datos
+include 'conexion.php';
+
+// Verifica si hay productos en el carrito
+if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
+    $total = 0;
+    echo '<div class="carrito-container">';
+    echo '<h1>Tu Carrito de Compras</h1>';
+    echo '<table>';
+    echo '<tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Total</th>
+            <th>Acciones</th>
+          </tr>';
+
+    foreach ($_SESSION['carrito'] as $producto_id => $detalle) {
+        // Consulta para obtener el nombre y la cantidad disponible del producto
+        $sql = "SELECT nombre, cantidad_disponible FROM productos WHERE id = ?";
+        if ($stmt = $conexion->prepare($sql)) {
+            $stmt->bind_param('i', $producto_id);
+            $stmt->execute();
+            $stmt->bind_result($nombre, $cantidad_disponible);
+            $stmt->fetch();
+            $stmt->close();
+        }
+
+        // Verifica si la cantidad deseada no excede la cantidad disponible
+        if ($detalle['cantidad'] > $cantidad_disponible) {
+            echo '<tr>';
+            echo '<td colspan="5">Lo sentimos, la cantidad solicitada de ' . htmlspecialchars($nombre) . ' excede la cantidad disponible. Solo quedan ' . $cantidad_disponible . ' unidades.</td>';
+            echo '</tr>';
+            // Ajustar la cantidad al máximo disponible
+            $detalle['cantidad'] = $cantidad_disponible;
+        }
+
+        $subtotal = $detalle['cantidad'] * $detalle['precio'];
+        $total += $subtotal;
+        echo '<tr>';
+        echo '<td>' . htmlspecialchars($nombre) . '</td>';
+        echo '<td>
+                <div class="cantidad-container">
+                    <input type="number" value="' . $detalle['cantidad'] . '" min="1" class="cantidad-input" data-producto-id="' . $producto_id . '" onchange="mostrarBotonActualizar(' . $producto_id . ')">
+                    <button class="btn-cancelar" data-producto-id="' . $producto_id . '" style="display:none;" onclick="cancelarCambio(' . $producto_id . ', ' . $detalle['cantidad'] .')">
+                        <img src="img/cancelarcarrito.png" alt="Actualizar" style="width: 15px; height: 15px;">
+                    </button>
+                    <button class="btn-actualizar" data-producto-id="' . $producto_id . '" style="display:none;" onclick="actualizarCantidad(' . $producto_id . ')">
+                        <img src="img/actualizarcarrito.png" alt="Actualizar" style="width: 15px; height: 15px;">
+                    </button>
+                </div>';
+        echo '<td>$' . number_format($detalle['precio'], 2) . '</td>';
+        echo '<td>$' . number_format($subtotal, 2) . '</td>';
+        echo '<td>
+                <button class="btn-eliminar" onclick="eliminarProducto(' . $producto_id . ')">Eliminar</button>
+              </td>';
+        echo '</tr>';
+    }
+    echo '</table>';
+    echo '<h2>Total: $' . number_format($total, 2) . '</h2>';
+    echo '<button onclick="irAComprar()">Finalizar Compra</button>'; // O un botón para continuar comprando
+    echo '</div>';
+} else {
+    echo '<p>No hay productos en el carrito.</p>';
+}
+?> 
+</div>
+ </div>
 
        <!-- Aquí inicia el Contenedor del formulario de inicio de sesión -->
     <?php if (!isset($_SESSION['user_name'])): ?>
@@ -249,76 +327,56 @@ session_start();
 <?php
 include 'conexion.php';
 
-
-// Verificar si el usuario está logueado
 function usuarioLogueado() {
-    return isset($_SESSION['user_id']); // O el nombre de la variable de sesión que uses para almacenar el ID del usuario
+    return isset($_SESSION['user_id']);
 }
 
-// Obtener el ID de la categoría desde la URL y asegurarse de que es un número entero
 $categoria_id = isset($_GET['categoria_id']) ? (int)$_GET['categoria_id'] : 0;
 
 if ($categoria_id > 0) {
-    // Preparar la consulta SQL
     $sql = "SELECT id, nombre, precio, descripción, imagen, cantidad_disponible 
             FROM productos 
             WHERE categoria_id = ?";
 
-    // Preparar la sentencia
     if ($stmt = $conexion->prepare($sql)) {
-        // Vincular el parámetro (sólo números enteros)
         $stmt->bind_param('i', $categoria_id);
-
-        // Ejecutar la sentencia
         $stmt->execute();
-
-        // Obtener los resultados
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            // Contenedor de productos
             echo '<div class="productos-container">';
 
             while ($producto = $result->fetch_assoc()) {
-                 // Mostrar producto en una tarjeta personalizada
-            echo '<div class="card-product">';
-            echo '<div class="card-product-img">';
-            echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">'; // Cambia la ruta de la imagen si es necesario
-            echo '</div>';
-            echo '<div class="card-product-body">';
-            echo '<h2 class="card-product-title">' . $producto["nombre"] . '</h2>';
-            echo '<p class="card-product-price">Precio: $' . $producto["precio"] . '</p>';
-            echo '<p class="card-product-description">' . $producto["descripción"] . '</p>';
-            echo '<p class="card-product-existencias">Existencias: ' . $producto["cantidad_disponible"] . '</p>';
-
-            // Sección de cantidad
-            echo '<div class="producto-cantidad">';
-            echo '<button class="cantidad-btn restar">-</button>';
-            echo '<input type="number" value="1" min="1" class="cantidad-input" data-producto-id="' . $producto["id"] . '" data-disponible="' . $producto["cantidad_disponible"] . '">';
-            echo '<button class="cantidad-btn sumar">+</button>';
-            echo '</div>';
-
-            // Botones de cancelar y actualizar ocultos
-            echo '<div class="opciones-cantidad" style="display:none;">';
-            echo '<button class="btn-cancelar-cambio"><img src="img/cancelarcarrito.png" alt="Cancelar" style="width: 20px; height: 20px;"></button>';
-            echo '<button class="btn-actualizar-cambio"><img src="img/actualizarcarrito.png" alt="Actualizar" style="width: 20px; height: 20px;"></button>';
-            echo '</div>';
-
-                // Botón de agregar al carrito o eliminar del carrito
-                //echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" '. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
-                //echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                echo '<div class="card-product">';
+                echo '<div class="card-product-img">';
+                echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">';
+                echo '</div>';
+                echo '<div class="card-product-body">';
+                echo '<h2 class="card-product-title">' . htmlspecialchars($producto["nombre"]) . '</h2>';
+                echo '<p class="card-product-price">Precio: $' . htmlspecialchars($producto["precio"]) . '</p>';
+                echo '<p class="card-product-description">' . htmlspecialchars($producto["descripción"]) . '</p>';
+                echo '<p class="card-product-existencias">Existencias: ' . htmlspecialchars($producto["cantidad_disponible"]) . '</p>';
+                
                 if (usuarioLogueado()) {
-                    // Botón para agregar o eliminar del carrito
-                    echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" '. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
-                    echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                    // Determina si el producto está en el carrito
+                    $enCarrito = isset($_SESSION['carrito'][$producto["id"]]);
+                    
+                    // Cambia el icono según el estado en el carrito
+                    if ($enCarrito) {
+                        echo '<button class="agregar-carrito-btn" onclick="eliminarDelCarrito(event, this)" data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                        echo '<img src="img/eliminarcarrito.png" alt="Eliminar del carrito" style="width: 25px; height: 25px;"></button>';
+                    } else {
+                        echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                        echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                    }
                 } else {
-                    // Si no está logueado, mostramos el botón para redirigir al formulario de login
-                   // echo '<button class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>';
-                    echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" '. ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') .' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                    echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
                     echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
                 }
+                
                 echo '</div>'; // Cerrar el cuerpo de la tarjeta
                 echo '</div>'; // Cerrar la tarjeta del producto
+                
             }
 
             echo '</div>'; // Cerrar el contenedor de productos
@@ -326,7 +384,6 @@ if ($categoria_id > 0) {
             echo '<p>No hay productos disponibles en esta categoría.</p>';
         }
 
-        // Cerrar la sentencia
         $stmt->close();
     } else {
         echo '<p>Error en la consulta: ' . $conexion->error . '</p>';
@@ -335,7 +392,6 @@ if ($categoria_id > 0) {
     echo '<p>Categoría no válida.</p>';
 }
 
-// Cerrar la conexión
 $conexion->close();
 ?>
 </div>
@@ -344,26 +400,19 @@ $conexion->close();
 <script src="scroll.js"></script>
 <script src="validacionesformularios.js"></script>
 <script src="validacionesproductos.js"></script>
+<script src="validacioncarrito.js"></script>
 <script>
+
+// Función para manejar añadir o eliminar del carrito
 function handleAddToCart(event, button) {
     const img = button.querySelector('img');
     const productId = button.getAttribute('data-producto-id');
-    const input = button.parentNode.querySelector('.cantidad-input');
-    const cantidad = parseInt(input.value);
-
-    // Aquí podrías verificar si el usuario está logueado desde el frontend
-    const isLoggedIn = <?php echo json_encode(usuarioLogueado()); ?>; // Convertir el valor de PHP a JS
-
+    const isLoggedIn = <?php echo json_encode(usuarioLogueado()); ?>;
     if (!isLoggedIn) {
-        // Si no está logueado, mostrar el formulario de inicio de sesión
         showLoginForm();
         return;
     }
-
-    // Determinar la acción (agregar o eliminar del carrito)
     const action = img.src.includes('agregarcarrito.png') ? 'add' : 'remove';
-
-    // Hacer una solicitud AJAX
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'agregar_al_carrito.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -389,11 +438,12 @@ function handleAddToCart(event, button) {
             alert('Error al procesar la solicitud.');
         }
     };
-
-    // Enviar solo producto_id y cantidad al servidor
-    xhr.send(`producto_id=${productId}&cantidad=${cantidad}&action=${action}`);
+    const postData = `producto_id=${productId}&action=${action}` + (action === 'add' ? '&cantidad=1' : '');
+    xhr.send(postData);
 }
+
 </script>
+
 
 </body>
 </html>

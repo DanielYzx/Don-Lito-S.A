@@ -1,72 +1,70 @@
-<?php 
+<?php
 session_start();
-include 'conexion.php';
+include 'conexion.php'; // Asegúrate de incluir la conexión a la base de datos
 
-// Verificar si se recibieron los datos correctos
-if (isset($_POST['producto_id'], $_POST['action'])) {
-    $producto_id = (int)$_POST['producto_id'];
-    $action = $_POST['action'];
+// Verificar si se recibe la acción y el producto
+if (isset($_POST['action']) && isset($_POST['producto_id'])) {
+    $producto_id = intval($_POST['producto_id']);
+    $accion = $_POST['action'];
 
-    if ($action === 'remove') {
-        // Eliminar producto del carrito
-        if (isset($_SESSION['carrito'][$producto_id])) {
-            unset($_SESSION['carrito'][$producto_id]);
+    // Consulta para obtener el precio del producto
+    $sql = "SELECT precio FROM productos WHERE id = ?";
+    if ($stmt = $conexion->prepare($sql)) {
+        $stmt->bind_param('i', $producto_id);
+        $stmt->execute();
+        $stmt->bind_result($precio);
+        $stmt->fetch();
+        $stmt->close();
+    }
+
+    if ($accion === 'add' && isset($_POST['cantidad'])) {
+        $nueva_cantidad = intval($_POST['cantidad']);
+
+        // Validar que la cantidad sea válida
+        if ($nueva_cantidad > 0) {
+            // Si el producto ya existe en el carrito, sumamos la cantidad
+            if (isset($_SESSION['carrito'][$producto_id])) {
+                $_SESSION['carrito'][$producto_id]['cantidad'] += $nueva_cantidad;
+            } else {
+                // Si no existe, lo añadimos al carrito
+                $_SESSION['carrito'][$producto_id] = [
+                    'cantidad' => $nueva_cantidad,
+                    'precio' => $precio // Almacena el precio del producto
+                ];
+            }
+
+            // Respuesta de éxito
             echo json_encode(['success' => true]);
         } else {
-            echo json_encode(['success' => false, 'error' => 'Producto no encontrado en el carrito.']);
+            echo json_encode(['success' => false, 'error' => 'La cantidad debe ser mayor que cero.']);
         }
-    } else {
-        // Solo si es agregar, verificar la cantidad
-        if (isset($_POST['cantidad'])) {
-            $cantidad = (int)$_POST['cantidad'];
+    } elseif ($accion === 'update' && isset($_POST['cantidad'])) {
+        $nueva_cantidad = intval($_POST['cantidad']);
 
-            // Consultar el precio y la descripción del producto desde la base de datos
-            $sql = "SELECT precio, descripción FROM productos WHERE id = ?";
-            if ($stmt = $conexion->prepare($sql)) {
-                // Vincular el parámetro (ID del producto)
-                $stmt->bind_param('i', $producto_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                // Verificar si el producto existe
-                if ($result->num_rows > 0) {
-                    $producto = $result->fetch_assoc();
-                    $precio = (float)$producto['precio'];
-                    $descripcion = $producto['descripción'];
-
-                    // Calcular el total basado en la cantidad ingresada
-                    $total = $cantidad * $precio;
-
-                    // Inicializar el carrito si no existe
-                    if (!isset($_SESSION['carrito'])) {
-                        $_SESSION['carrito'] = [];
-                    }
-
-                    // Agregar producto al carrito
-                    $_SESSION['carrito'][$producto_id] = [
-                        'cantidad' => $cantidad,
-                        'precio' => $precio,
-                        'descripcion' => $descripcion,
-                        'total' => $total
-                    ];
-
-                    echo json_encode(['success' => true]);
-                } else {
-                    echo json_encode(['success' => false, 'error' => 'Producto no encontrado.']);
-                }
-
-                $stmt->close();
+        // Validar que la cantidad sea válida
+        if ($nueva_cantidad > 0) {
+            // Actualizar la cantidad en la sesión
+            if (isset($_SESSION['carrito'][$producto_id])) {
+                $_SESSION['carrito'][$producto_id]['cantidad'] = $nueva_cantidad;
+                // Respuesta de éxito
+                echo json_encode(['success' => true]);
             } else {
-                echo json_encode(['success' => false, 'error' => 'Error en la consulta.']);
+                echo json_encode(['success' => false, 'error' => 'El producto no se encuentra en el carrito.']);
             }
         } else {
-            echo json_encode(['success' => false, 'error' => 'Cantidad no especificada.']);
+            echo json_encode(['success' => false, 'error' => 'La cantidad debe ser mayor que cero.']);
         }
+    } elseif ($accion === 'remove') {
+        // Lógica para eliminar el producto del carrito
+        unset($_SESSION['carrito'][$producto_id]);
+        echo json_encode(['success' => true]);
     }
 } else {
-    echo json_encode(['success' => false, 'error' => 'Datos no válidos.']);
+    echo json_encode(['success' => false, 'error' => 'Acción no válida.']);
 }
-
-$conexion->close();
 ?>
+
+
+
+
 

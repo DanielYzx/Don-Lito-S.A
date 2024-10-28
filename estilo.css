@@ -18,18 +18,6 @@ body {
     margin: 0 10px; /* Espaciado alrededor del divisor */
 }
 
-.nav-buttons {
-    background-color: #6c757d; /* Color de fondo de los botones */
-    color: white; /* Color del texto en los botones */
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    text-align: center;
-    white-space: nowrap; /* Evitar que el texto se divida en varias líneas */
-    margin: 2px; /* Espacio entre los botones */
-    width: 220px; /* Ancho inicial de los botones */
-    height: 50px; /* Alto inicial de los botones */
-}
 .nav-buttons:hover {
     background-color: #5a6268; /* Color de fondo cuando se pasa el mouse por encima */
 }
@@ -100,6 +88,7 @@ body {
 .buttons-container {
     display: flex;
     flex-wrap: wrap; /* Permite que los botones se ajusten en varias líneas */
+    margin-top: 15px; /* Ajusta este valor a la altura exacta del navbar */
 }
 
 /* Estilos para los botones */
@@ -114,6 +103,7 @@ body {
     margin: 2px; /* Espacio entre los botones */
     width: 215px; /* Ancho inicial de los botones */
     height: 50px; /* Alto inicial de los botones */
+   
 }
 
 .nav-buttons:hover {
@@ -138,7 +128,7 @@ body {
         padding: 10px; /* Espaciado interno */
         text-align: center; /* Centra el texto */
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Sombra para mejor visibilidad */
-        margin-top: 20px; /* Ajusta este valor al alto del navbar para asegurar que el botón esté debajo del navbar */
+        margin-top: 0px; /* Ajusta este valor al alto del navbar para asegurar que el botón esté debajo del navbar */
     }
 }
 
