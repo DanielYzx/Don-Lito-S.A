@@ -416,7 +416,7 @@ function mostrarMasVendidos($conexion)
                         echo '<p class="card-text">' . htmlspecialchars($producto) . '</p>';
                         echo '</div>';
                         echo '<div class="card-img">';
-                        echo '<img src="img/default-product.jpg" alt="Producto recomendado">';
+                        echo '<img src="img/oferta1.jpg" alt="Producto recomendado">';
                         echo '</div>';
                         echo '</a>';
                         echo '</div>';
