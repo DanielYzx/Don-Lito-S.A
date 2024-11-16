@@ -344,6 +344,114 @@ if ($result->num_rows > 0) {
             ?>
             </div>
         </div>
+
+        <?php
+
+
+// Incluir la conexión a la base de datos
+include 'conexion.php';
+
+// Función para mostrar los productos más vendidos
+function mostrarMasVendidos($conexion)
+{
+    // Consulta para obtener los productos más vendidos
+    $sql = "SELECT p.id, p.nombre, p.imagen, SUM(dp.cantidad) AS total_vendido
+            FROM productos p
+            INNER JOIN pedido_detalles dp ON p.id = dp.producto_id
+            GROUP BY p.id, p.nombre, p.imagen
+            ORDER BY total_vendido DESC
+            LIMIT 5";
+
+    $result = $conexion->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            echo '<div class="col-auto">';
+            echo '<a href="#" class="card btn text-center">';
+            echo '<div class="card-body">';
+            echo '<p class="card-text">' . htmlspecialchars($row['nombre']) . '</p>';
+            echo '</div>';
+            echo '<div class="card-img">';
+            echo '<img src="img/' . htmlspecialchars($row['imagen']) . '" alt="' . htmlspecialchars($row['nombre']) . '">';
+            echo '</div>';
+            echo '</a>';
+            echo '</div>';
+        }
+    } else {
+        echo "<p>No hay productos más vendidos en este momento.</p>";
+    }
+}
+?>
+
+<div class="container my-4">
+    <h3 class="text-center">Recomendaciones para ti</h3>
+    <div class="row justify-content-center">
+        <?php
+        // Validar si el usuario está logueado
+        if (isset($_SESSION['user_id'])) {
+            // ID del usuario logueado
+            $usuario_id = $_SESSION['user_id'];
+
+            // URL de la API
+            $api_url = "http://127.0.0.1:5000/recomendaciones/" . $usuario_id;
+
+            // Consumir la API usando cURL
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $api_url);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            $response = curl_exec($curl);
+
+            // Verificar si hubo un error en la llamada
+            if ($response === false) {
+                echo "Error al obtener recomendaciones.";
+            } else {
+                $data = json_decode($response, true);
+
+                // Verificar si hay recomendaciones
+                if (isset($data['recomendaciones']) && count($data['recomendaciones']) > 0) {
+                    foreach ($data['recomendaciones'] as $producto) {
+                        echo '<div class="col-auto">';
+                        echo '<a href="#" class="card btn text-center">';
+                        echo '<div class="card-body">';
+                        echo '<p class="card-text">' . htmlspecialchars($producto) . '</p>';
+                        echo '</div>';
+                        echo '<div class="card-img">';
+                        echo '<img src="img/default-product.jpg" alt="Producto recomendado">';
+                        echo '</div>';
+                        echo '</a>';
+                        echo '</div>';
+                    }
+                } else {
+                    // Mostrar productos más vendidos si no hay recomendaciones
+                    
+                    echo "<p class='text-center font-weight-bold' style='color: black; font-size: 1em;'>No hay recomendaciones personalizadas disponibles en este momento. Mira nuestros productos más populares:</p>";
+
+
+                    mostrarMasVendidos($conexion);
+                }
+            }
+
+            curl_close($curl);
+        } else {
+            // Si el usuario no está logueado
+            echo '<p class="text-center">Por favor, <a href="#" onclick="showLoginForm()" style="color: #007bff; text-decoration: none; font-weight: bold;">inicia sesión</a> para ver tus recomendaciones personalizadas.</p>';
+
+
+            echo '<p style="text-align: center; font-weight: bold; font-size: 1.2em;">Revisa nuestros productos más vendidos:</p>';
+
+            mostrarMasVendidos($conexion);
+        }
+        ?>
+    </div>
+</div>
+
+
+
+
+
+
+
+
     </div>
 
     <script src="js/bootstrap.bundle.min.js"></script>

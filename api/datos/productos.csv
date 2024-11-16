@@ -1,0 +1,8 @@
+"id","nombre","descripción","imagen","precio","cantidad_disponible","marca","categoria_id"
+"1","Smartphone XYZ","Teléfono inteligente con pantalla HD",,"499.99","50","XYZ","1"
+"2","Camiseta Negra","Camiseta de algodón en color negro",,"19.99","100","MarcaA","2"
+"3","Silla de Oficina","Silla ergonómica con soporte lumbar",,"129.99","30","MarcaB","3"
+"4","Balón de Fútbol","Balón oficial de tamaño 5",,"29.99","20","MarcaC","4"
+"5","bocina","no tinene",,"12.00","12",NULL,"1"
+"6","aceiteasd","sadasd",,"3.00","55","ds","1"
+"7","rwer","werw",,"6.00","544","rwe","1"

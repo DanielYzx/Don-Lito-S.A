@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("ssss", $name, $email, $password_hash, $direccion);
     if ($stmt->execute()) {
         // Registro exitoso, redirigir a la página principal o a una página de bienvenida
+        $_SESSION['user_id'] = $stmt->insert_id; 
         $_SESSION['user_name'] = $name;
         unset($_SESSION['form_data']); // Limpiar los datos del formulario
         unset($_SESSION['error_register']); // Limpiar el error
