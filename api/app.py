@@ -87,7 +87,7 @@ def get_recommendations(usuario_id):
         recomendaciones.sort(key=lambda x: x['score'], reverse=True)
 
         # Retornar las 5 mejores recomendaciones
-        return jsonify({'usuario_id': usuario_id, 'recomendaciones': recomendaciones[:5]})
+        return jsonify({'usuario_id': usuario_id, 'recomendaciones': recomendaciones[:6]})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

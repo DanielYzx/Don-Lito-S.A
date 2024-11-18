@@ -2,7 +2,7 @@
 // Inicia la sesión
 session_start();
 
-
+$_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actual
 
 ?>
 
@@ -15,6 +15,7 @@ session_start();
     <title>Pantalla Principal</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="estilo.css">
+    <link rel="stylesheet" href="estilocarrito.css">
 </head>
 <body>
  <?php include 'conexion.php'; ?> 
@@ -38,18 +39,19 @@ session_start();
                         <button type="button" class="btn btn-primary" onclick="showLoginFormem()">Inicia sesión Empleados</button>
                     <?php endif; ?>
                     <div class="vertical-divider"></div>
-                    <button type="button" class="btn" width="40" height="40">
-                        <img src="img/carrito.png" alt="Carrito Icon">
-                    </button>
+                    <button type="button" class="btn" onclick="window.location.href='vercarrito.php';" width="40" height="40">
+               <img src="img/carrito.png" alt="Carrito Icon">
+                </button>
                     <span>$ 0.00</span>
                 </div>
                 <div class="col-12 col-md-6 order-md-1">
-                    <form class="d-flex mt-2 mt-md-0" action="buscar.php" method="POST">
-                        <input class="form-control me-2" type="search" name="busqueda" placeholder="¿Qué estás buscando?" aria-label="Search">
-                        <button type="submit" class="btn btn-success">
-                            <img src="img/buscar.png" alt="Buscar" width="20" height="20">
-                        </button>
-                    </form>
+                <form class="d-flex mt-2 mt-md-0" action="buscar.php" method="GET">
+                        <input class="form-control me-2" type="search" name="busqueda" placeholder="¿Qué estás buscando?" aria-label="Search" 
+                                value="<?php echo isset($_GET['busqueda']) ? htmlspecialchars($_GET['busqueda']) : ''; ?>">
+                                 <button type="submit" class="btn btn-success">
+                                <img src="img/buscar.png" alt="Buscar" width="20" height="20">
+                                </button>
+                </form>
                 </div>
             </div>
         </div>
@@ -347,13 +349,15 @@ if ($result->num_rows > 0) {
 
 <!-- Sección de recomendaciones -->
 <!-- Sección de recomendaciones -->
-<!-- Sección de recomendaciones -->
-<!-- Sección de recomendaciones -->
 <div class="container my-4">
     <h3 class="text-center">Recomendaciones para ti</h3>
     <div class="row justify-content-center">
         <?php
         include 'conexion.php';
+        function usuarioLogueado() {
+            return isset($_SESSION['user_id']);
+        }
+        
 
         // Validar si el usuario está logueado
         if (isset($_SESSION['user_id'])) {
@@ -393,17 +397,42 @@ if ($result->num_rows > 0) {
                         $result_productos = mysqli_query($conexion, $sql_productos);
 
                         if ($result_productos && mysqli_num_rows($result_productos) > 0) {
+                            echo '<div class="productos-container">';
+
                             while ($producto = mysqli_fetch_assoc($result_productos)) {
-                                echo '<div class="col-12 col-md-4 mb-4">';
-                                echo '<div class="card">';
-                                echo '<img src="' . $producto['imagen'] . '" alt="Imagen de producto" class="card-img-top">';
-                                echo '<div class="card-body">';
-                                echo '<h5 class="card-title">' . $producto['nombre'] . '</h5>';
-                                echo '<p class="card-text">Precio: $' . $producto['precio'] . '</p>';
+                                echo '<div class="card-product">';
+                                echo '<div class="card-product-img">';
+                                echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">';
                                 echo '</div>';
-                                echo '</div>';
-                                echo '</div>';
+                                echo '<div class="card-product-body">';
+                                echo '<h2 class="card-product-title">' . htmlspecialchars($producto["nombre"]) . '</h2>';
+                                echo '<p class="card-product-price">Precio: $' . htmlspecialchars($producto["precio"]) . '</p>';
+                                echo '<p class="card-product-description">' . htmlspecialchars($producto["descripción"]) . '</p>';
+                                echo '<p class="card-product-existencias">Existencias: ' . htmlspecialchars($producto["cantidad_disponible"]) . '</p>';
+
+                                if (usuarioLogueado()) {
+                                    // Determina si el producto está en el carrito
+                                    $enCarrito = isset($_SESSION['carrito'][$producto["id"]]);
+                                    
+                                    // Cambia el icono según el estado en el carrito
+                                    if ($enCarrito) {
+                                        echo '<button class="agregar-carrito-btn" onclick="eliminarDelCarrito(event, this)" data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                                        echo '<img src="img/eliminarcarrito.png" alt="Eliminar del carrito" style="width: 25px; height: 25px;"></button>';
+                                    } else {
+                                        echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                                        echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                                    }
+                                } else {
+                                    echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                                    echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                                }
+                                
+                                echo '</div>'; // Cerrar el cuerpo de la tarjeta
+                                echo '</div>'; // Cerrar la tarjeta del producto
+                               
                             }
+
+                            echo '</div>'; // Cerrar contenedor de productos
                         } else {
                             echo "No se encontraron detalles de los productos más vendidos.";
                         }
@@ -434,17 +463,41 @@ if ($result->num_rows > 0) {
                         $result_productos = mysqli_query($conexion, $sql_productos);
 
                         if ($result_productos && mysqli_num_rows($result_productos) > 0) {
+                            echo '<div class="productos-container">';
+
                             while ($producto = mysqli_fetch_assoc($result_productos)) {
-                                echo '<div class="col-12 col-md-4 mb-4">';
-                                echo '<div class="card">';
-                                echo '<img src="' . $producto['imagen'] . '" alt="Imagen de producto" class="card-img-top">';
-                                echo '<div class="card-body">';
-                                echo '<h5 class="card-title">' . $producto['nombre'] . '</h5>';
-                                echo '<p class="card-text">Precio: $' . $producto['precio'] . '</p>';
+                                echo '<div class="card-product">';
+                                echo '<div class="card-product-img">';
+                                echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">';
                                 echo '</div>';
-                                echo '</div>';
-                                echo '</div>';
+                                echo '<div class="card-product-body">';
+                                echo '<h2 class="card-product-title">' . htmlspecialchars($producto["nombre"]) . '</h2>';
+                                echo '<p class="card-product-price">Precio: $' . htmlspecialchars($producto["precio"]) . '</p>';
+                                echo '<p class="card-product-description">' . htmlspecialchars($producto["descripción"]) . '</p>';
+                                echo '<p class="card-product-existencias">Existencias: ' . htmlspecialchars($producto["cantidad_disponible"]) . '</p>';
+                                
+                                if (usuarioLogueado()) {
+                                    // Determina si el producto está en el carrito
+                                    $enCarrito = isset($_SESSION['carrito'][$producto["id"]]);
+                                    
+                                    // Cambia el icono según el estado en el carrito
+                                    if ($enCarrito) {
+                                        echo '<button class="agregar-carrito-btn" onclick="eliminarDelCarrito(event, this)" data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                                        echo '<img src="img/eliminarcarrito.png" alt="Eliminar del carrito" style="width: 25px; height: 25px;"></button>';
+                                    } else {
+                                        echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                                        echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                                    }
+                                } else {
+                                    echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                                    echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                                }
+
+                                echo '</div>';// Cerrar el cuerpo de la tarjeta
+                                echo '</div>';// Cerrar la tarjeta del producto
                             }
+
+                            echo '</div>'; // Cerrar contenedor de productos
                         } else {
                             echo "No se encontraron detalles de las recomendaciones.";
                         }
@@ -480,17 +533,40 @@ if ($result->num_rows > 0) {
                     $result_productos = mysqli_query($conexion, $sql_productos);
 
                     if ($result_productos && mysqli_num_rows($result_productos) > 0) {
+                        echo '<div class="productos-container">';
+
                         while ($producto = mysqli_fetch_assoc($result_productos)) {
-                            echo '<div class="col-12 col-md-4 mb-4">';
-                            echo '<div class="card">';
-                            echo '<img src="' . $producto['imagen'] . '" alt="Imagen de producto" class="card-img-top">';
-                            echo '<div class="card-body">';
-                            echo '<h5 class="card-title">' . $producto['nombre'] . '</h5>';
-                            echo '<p class="card-text">Precio: $' . $producto['precio'] . '</p>';
+                            echo '<div class="card-product">';
+                            echo '<div class="card-product-img">';
+                            echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">';
                             echo '</div>';
+                            echo '<div class="card-product-body">';
+                            echo '<h2 class="card-product-title">' . htmlspecialchars($producto["nombre"]) . '</h2>';
+                            echo '<p class="card-product-price">Precio: $' . htmlspecialchars($producto["precio"]) . '</p>';
+                            echo '<p class="card-product-description">' . htmlspecialchars($producto["descripción"]) . '</p>';
+                            echo '<p class="card-product-existencias">Existencias: ' . htmlspecialchars($producto["cantidad_disponible"]) . '</p>';
+                            if (usuarioLogueado()) {
+                                // Determina si el producto está en el carrito
+                                $enCarrito = isset($_SESSION['carrito'][$producto["id"]]);
+                                
+                                // Cambia el icono según el estado en el carrito
+                                if ($enCarrito) {
+                                    echo '<button class="agregar-carrito-btn" onclick="eliminarDelCarrito(event, this)" data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                                    echo '<img src="img/eliminarcarrito.png" alt="Eliminar del carrito" style="width: 25px; height: 25px;"></button>';
+                                } else {
+                                    echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                                    echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                                }
+                            } else {
+                                echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                                echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
+                            }
+
                             echo '</div>';
                             echo '</div>';
                         }
+
+                        echo '</div>'; // Cerrar contenedor de productos
                     } else {
                         echo "No se encontraron detalles de los productos más vendidos.";
                     }
@@ -502,7 +578,7 @@ if ($result->num_rows > 0) {
         }
         ?>
     </div>
-</div>
+
 
 
 
@@ -511,9 +587,50 @@ if ($result->num_rows > 0) {
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="validacionesformularios.js"></script>
     <script src="empleados.js"></script>
+    <script src="validacionesproductos.js"></script>
+    <script src="validacioncarrito.js"></script>
    <script src="scroll.js"></script>    
    <script>
-</script>
-</script>
+    
+// Función para manejar añadir o eliminar del carrito
+function handleAddToCart(event, button) {
+    const img = button.querySelector('img');
+    const productId = button.getAttribute('data-producto-id');
+    const isLoggedIn = <?php echo json_encode(usuarioLogueado()); ?>;
+    if (!isLoggedIn) {
+        showLoginForm();
+        return;
+    }
+    const action = img.src.includes('agregarcarrito.png') ? 'add' : 'remove';
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'agregar_al_carrito.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                if (action === 'add') {
+                    img.src = 'img/eliminarcarrito.png';
+                    img.alt = 'Eliminar del carrito';
+                    button.style.backgroundColor = '#dc3545';
+                    alert('Producto añadido al carrito.');
+                } else {
+                    img.src = 'img/agregarcarrito.png';
+                    img.alt = 'Añadir al carrito';
+                    button.style.backgroundColor = '#28a745';
+                    alert('Producto eliminado del carrito.');
+                }
+            } else {
+                alert('Error: ' + response.error);
+            }
+        } else {
+            alert('Error al procesar la solicitud.');
+        }
+    };
+    const postData = `producto_id=${productId}&action=${action}` + (action === 'add' ? '&cantidad=1' : '');
+    xhr.send(postData);
+}
+
+  </script>
 </body>
 </html>     

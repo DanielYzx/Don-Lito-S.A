@@ -1,4 +1,3 @@
-
 <?php
 // Inicia la sesión
 session_start();
@@ -45,13 +44,12 @@ $_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actua
                     <span>$ 0.00</span>
                 </div>
                 <div class="col-12 col-md-6 order-md-1">
-                <form class="d-flex mt-2 mt-md-0" action="buscar.php" method="GET">
-                        <input class="form-control me-2" type="search" name="busqueda" placeholder="¿Qué estás buscando?" aria-label="Search" 
-                                value="<?php echo isset($_GET['busqueda']) ? htmlspecialchars($_GET['busqueda']) : ''; ?>">
-                                 <button type="submit" class="btn btn-success">
-                                <img src="img/buscar.png" alt="Buscar" width="20" height="20">
-                                </button>
-                </form>
+                    <form class="d-flex mt-2 mt-md-0" action="buscar.php" method="POST">
+                        <input class="form-control me-2" type="search" name="busqueda" placeholder="¿Qué estás buscando?" aria-label="Search">
+                        <button type="submit" class="btn btn-success">
+                            <img src="img/buscar.png" alt="Buscar" width="20" height="20">
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -247,90 +245,74 @@ $_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actua
     </div>
 </div>
 
-<!-- Carrusel de imágenes de ofertas -->
-
-
-<!-- productos por categoria -->
 <div class="contenedor-principal">
 <?php
-include 'conexion.php';
-
+include('conexion.php'); // Incluir el archivo de conexión a la base de datos
 function usuarioLogueado() {
     return isset($_SESSION['user_id']);
 }
 
-$categoria_id = isset($_GET['categoria_id']) ? (int)$_GET['categoria_id'] : 0;
 
-if ($categoria_id > 0) {
-    $sql = "SELECT id, nombre, precio, descripción, imagen, cantidad_disponible 
-            FROM productos 
-            WHERE categoria_id = ?";
+if (isset($_POST['busqueda'])) {
+    $busqueda = $conexion->real_escape_string($_POST['busqueda']); // Sanitizar la entrada
 
-    if ($stmt = $conexion->prepare($sql)) {
-        $stmt->bind_param('i', $categoria_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+    // Consulta a la base de datos
+    $query = "SELECT * FROM productos WHERE nombre LIKE '%$busqueda%' OR descripción LIKE '%$busqueda%'";
+    $resultado = $conexion->query($query);
 
-        if ($result->num_rows > 0) {
-            echo '<div class="productos-container">';
-
-            while ($producto = $result->fetch_assoc()) {
-                echo '<div class="card-product">';
-                echo '<div class="card-product-img">';
-                echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">';
-                echo '</div>';
-                echo '<div class="card-product-body">';
-                echo '<h2 class="card-product-title">' . htmlspecialchars($producto["nombre"]) . '</h2>';
-                echo '<p class="card-product-price">Precio: $' . htmlspecialchars($producto["precio"]) . '</p>';
-                echo '<p class="card-product-description">' . htmlspecialchars($producto["descripción"]) . '</p>';
-                echo '<p class="card-product-existencias">Existencias: ' . htmlspecialchars($producto["cantidad_disponible"]) . '</p>';
-                
-                if (usuarioLogueado()) {
-                    // Determina si el producto está en el carrito
-                    $enCarrito = isset($_SESSION['carrito'][$producto["id"]]);
-                    
-                    // Cambia el icono según el estado en el carrito
-                    if ($enCarrito) {
-                        echo '<button class="agregar-carrito-btn" onclick="eliminarDelCarrito(event, this)" data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
-                        echo '<img src="img/eliminarcarrito.png" alt="Eliminar del carrito" style="width: 25px; height: 25px;"></button>';
-                    } else {
-                        echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
-                        echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
-                    }
-                } else {
-                    echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
-                    echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
-                }
-                
-                echo '</div>'; // Cerrar el cuerpo de la tarjeta
-                echo '</div>'; // Cerrar la tarjeta del producto
-                
+    if ($resultado->num_rows > 0) {
+        echo "<h2>Resultados de búsqueda:</h2>";
+        echo '<div class="productos-container">';
+        while ($producto = $resultado->fetch_assoc()) {
+            echo '<div class="card-product">';
+        echo '<div class="card-product-img">';
+        echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">';
+        echo '</div>';
+        echo '<div class="card-product-body">';
+        echo '<h2 class="card-product-title">' . htmlspecialchars($producto["nombre"]) . '</h2>';
+        echo '<p class="card-product-price">Precio: $' . htmlspecialchars($producto["precio"]) . '</p>';
+        echo '<p class="card-product-description">' . htmlspecialchars($producto["descripción"]) . '</p>';
+        echo '<p class="card-product-existencias">Existencias: ' . htmlspecialchars($producto["cantidad_disponible"]) . '</p>';
+        
+        if (usuarioLogueado()) {
+            // Determina si el producto está en el carrito
+            $enCarrito = isset($_SESSION['carrito'][$producto["id"]]);
+            
+            // Cambia el icono según el estado en el carrito
+            if ($enCarrito) {
+                echo '<button class="agregar-carrito-btn" onclick="eliminarDelCarrito(event, this)" data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                echo '<img src="img/eliminarcarrito.png" alt="Eliminar del carrito" style="width: 25px; height: 25px;"></button>';
+            } else {
+                echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+                echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
             }
-
-            echo '</div>'; // Cerrar el contenedor de productos
         } else {
-            echo '<p>No hay productos disponibles en esta categoría.</p>';
+            echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
+            echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
         }
-
-        $stmt->close();
+        
+        echo '</div>'; // Cerrar el cuerpo de la tarjeta
+        echo '</div>'; // Cerrar la tarjeta del producto
+        
+        }
     } else {
-        echo '<p>Error en la consulta: ' . $conexion->error . '</p>';
+        echo "<p>No se encontraron resultados para '$busqueda'.</p>";
     }
 } else {
-    echo '<p>Categoría no válida.</p>';
+    echo "<p>No se ha realizado ninguna búsqueda.</p>";
 }
 
-$conexion->close();
+$conexion->close(); // Cerrar la conexión
 ?>
 </div>
-
 <script src="js/bootstrap.bundle.min.js"></script>
-<script src="scroll.js"></script>
-<script src="validacionesformularios.js"></script>
-<script src="validacionesproductos.js"></script>
-<script src="validacioncarrito.js"></script>
-<script>
-
+    <script src="validacionesformularios.js"></script>
+    <script src="empleados.js"></script>
+    <script src="validacionesproductos.js"></script>
+    <script src="validacioncarrito.js"></script>
+   <script src="scroll.js"></script>    
+   <script>
+    
 // Función para manejar añadir o eliminar del carrito
 function handleAddToCart(event, button) {
     const img = button.querySelector('img');
@@ -370,8 +352,6 @@ function handleAddToCart(event, button) {
     xhr.send(postData);
 }
 
-</script>
-
-
-</body>
-</html>
+  </script>
+  </body>
+  </html>    
