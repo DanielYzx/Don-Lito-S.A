@@ -345,110 +345,164 @@ if ($result->num_rows > 0) {
             </div>
         </div>
 
-        <?php
-
-
-// Incluir la conexión a la base de datos
-include 'conexion.php';
-
-// Función para mostrar los productos más vendidos
-function mostrarMasVendidos($conexion)
-{
-    // Consulta para obtener los productos más vendidos
-    $sql = "SELECT p.id, p.nombre, p.imagen, SUM(dp.cantidad) AS total_vendido
-            FROM productos p
-            INNER JOIN pedido_detalles dp ON p.id = dp.producto_id
-            GROUP BY p.id, p.nombre, p.imagen
-            ORDER BY total_vendido DESC
-            LIMIT 5";
-
-    $result = $conexion->query($sql);
-
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            echo '<div class="col-auto">';
-            echo '<a href="#" class="card btn text-center">';
-            echo '<div class="card-body">';
-            echo '<p class="card-text">' . htmlspecialchars($row['nombre']) . '</p>';
-            echo '</div>';
-            echo '<div class="card-img">';
-            echo '<img src="img/' . htmlspecialchars($row['imagen']) . '" alt="' . htmlspecialchars($row['nombre']) . '">';
-            echo '</div>';
-            echo '</a>';
-            echo '</div>';
-        }
-    } else {
-        echo "<p>No hay productos más vendidos en este momento.</p>";
-    }
-}
-?>
-
+<!-- Sección de recomendaciones -->
+<!-- Sección de recomendaciones -->
+<!-- Sección de recomendaciones -->
+<!-- Sección de recomendaciones -->
 <div class="container my-4">
     <h3 class="text-center">Recomendaciones para ti</h3>
     <div class="row justify-content-center">
         <?php
+        include 'conexion.php';
+
         // Validar si el usuario está logueado
         if (isset($_SESSION['user_id'])) {
             // ID del usuario logueado
             $usuario_id = $_SESSION['user_id'];
 
-            // URL de la API
-            $api_url = "http://127.0.0.1:5000/recomendaciones/" . $usuario_id;
+            // Verificar si el usuario ha realizado algún pedido
+            $sql = "SELECT COUNT(*) AS pedidos_count FROM pedidos WHERE usuario_id = $usuario_id";
+            $result = mysqli_query($conexion, $sql);
+            $row = mysqli_fetch_assoc($result);
+            $pedidos_count = $row['pedidos_count'];
 
-            // Consumir la API usando cURL
+            // Si el usuario no tiene pedidos
+            if ($pedidos_count == 0) {
+                echo '<p class="text-center">Por el momento no tienes recomendaciones personalizadas, pero puedes ver nuestros productos más populares.</p>';
+                echo '<h3 class="text-center">Estos son los productos más vendidos</h3>';
+
+                // Obtener productos más vendidos desde la API
+                $api_url = "http://127.0.0.1:5000/productos-mas-vendidos";
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, $api_url);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                $response = curl_exec($curl);
+
+                if ($response === false) {
+                    echo "Error al obtener productos más vendidos.";
+                } else {
+                    $data = json_decode($response, true);
+
+                    if (isset($data) && count($data) > 0) {
+                        // Obtener los IDs de los productos más vendidos
+                        $productos_ids = array_column($data, 'producto_id');
+                        $productos_ids_str = implode(',', $productos_ids);
+
+                        // Consultar los detalles de los productos en la base de datos
+                        $sql_productos = "SELECT * FROM productos WHERE id IN ($productos_ids_str)";
+                        $result_productos = mysqli_query($conexion, $sql_productos);
+
+                        if ($result_productos && mysqli_num_rows($result_productos) > 0) {
+                            while ($producto = mysqli_fetch_assoc($result_productos)) {
+                                echo '<div class="col-12 col-md-4 mb-4">';
+                                echo '<div class="card">';
+                                echo '<img src="' . $producto['imagen'] . '" alt="Imagen de producto" class="card-img-top">';
+                                echo '<div class="card-body">';
+                                echo '<h5 class="card-title">' . $producto['nombre'] . '</h5>';
+                                echo '<p class="card-text">Precio: $' . $producto['precio'] . '</p>';
+                                echo '</div>';
+                                echo '</div>';
+                                echo '</div>';
+                            }
+                        } else {
+                            echo "No se encontraron detalles de los productos más vendidos.";
+                        }
+                    } else {
+                        echo "No se encontraron productos más vendidos.";
+                    }
+                }
+                curl_close($curl);
+            } else {
+                // Si tiene pedidos, obtener recomendaciones personalizadas
+                $api_url = "http://127.0.0.1:5000/recomendaciones/" . $usuario_id;
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, $api_url);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                $response = curl_exec($curl);
+
+                if ($response === false) {
+                    echo "Error al obtener recomendaciones.";
+                } else {
+                    $data = json_decode($response, true);
+
+                    if (isset($data['recomendaciones']) && count($data['recomendaciones']) > 0) {
+                        $productos_ids = array_column($data['recomendaciones'], 'producto_id');
+                        $productos_ids_str = implode(',', $productos_ids);
+
+                        // Consultar los detalles de los productos recomendados en la base de datos
+                        $sql_productos = "SELECT * FROM productos WHERE id IN ($productos_ids_str)";
+                        $result_productos = mysqli_query($conexion, $sql_productos);
+
+                        if ($result_productos && mysqli_num_rows($result_productos) > 0) {
+                            while ($producto = mysqli_fetch_assoc($result_productos)) {
+                                echo '<div class="col-12 col-md-4 mb-4">';
+                                echo '<div class="card">';
+                                echo '<img src="' . $producto['imagen'] . '" alt="Imagen de producto" class="card-img-top">';
+                                echo '<div class="card-body">';
+                                echo '<h5 class="card-title">' . $producto['nombre'] . '</h5>';
+                                echo '<p class="card-text">Precio: $' . $producto['precio'] . '</p>';
+                                echo '</div>';
+                                echo '</div>';
+                                echo '</div>';
+                            }
+                        } else {
+                            echo "No se encontraron detalles de las recomendaciones.";
+                        }
+                    } else {
+                        echo "No se encontraron recomendaciones.";
+                    }
+                }
+                curl_close($curl);
+            }
+        } else {
+            // Si no está logueado
+            echo '<p class="text-center">Inicia sesión para ver recomendaciones personalizadas.</p>';
+            echo '<h3 class="text-center">Estos son los productos más vendidos</h3>';
+
+            // Obtener productos más vendidos desde la API
+            $api_url = "http://127.0.0.1:5000/productos-mas-vendidos";
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $api_url);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             $response = curl_exec($curl);
 
-            // Verificar si hubo un error en la llamada
             if ($response === false) {
-                echo "Error al obtener recomendaciones.";
+                echo "Error al obtener productos más vendidos.";
             } else {
                 $data = json_decode($response, true);
 
-                // Verificar si hay recomendaciones
-                if (isset($data['recomendaciones']) && count($data['recomendaciones']) > 0) {
-                    foreach ($data['recomendaciones'] as $producto) {
-                        echo '<div class="col-auto">';
-                        echo '<a href="#" class="card btn text-center">';
-                        echo '<div class="card-body">';
-                        echo '<p class="card-text">' . htmlspecialchars($producto) . '</p>';
-                        echo '</div>';
-                        echo '<div class="card-img">';
-                        echo '<img src="img/oferta1.jpg" alt="Producto recomendado">';
-                        echo '</div>';
-                        echo '</a>';
-                        echo '</div>';
+                if (isset($data) && count($data) > 0) {
+                    $productos_ids = array_column($data, 'producto_id');
+                    $productos_ids_str = implode(',', $productos_ids);
+
+                    // Consultar los detalles de los productos más vendidos
+                    $sql_productos = "SELECT * FROM productos WHERE id IN ($productos_ids_str)";
+                    $result_productos = mysqli_query($conexion, $sql_productos);
+
+                    if ($result_productos && mysqli_num_rows($result_productos) > 0) {
+                        while ($producto = mysqli_fetch_assoc($result_productos)) {
+                            echo '<div class="col-12 col-md-4 mb-4">';
+                            echo '<div class="card">';
+                            echo '<img src="' . $producto['imagen'] . '" alt="Imagen de producto" class="card-img-top">';
+                            echo '<div class="card-body">';
+                            echo '<h5 class="card-title">' . $producto['nombre'] . '</h5>';
+                            echo '<p class="card-text">Precio: $' . $producto['precio'] . '</p>';
+                            echo '</div>';
+                            echo '</div>';
+                            echo '</div>';
+                        }
+                    } else {
+                        echo "No se encontraron detalles de los productos más vendidos.";
                     }
                 } else {
-                    // Mostrar productos más vendidos si no hay recomendaciones
-                    
-                    echo "<p class='text-center font-weight-bold' style='color: black; font-size: 1em;'>No hay recomendaciones personalizadas disponibles en este momento. Mira nuestros productos más populares:</p>";
-
-
-                    mostrarMasVendidos($conexion);
+                    echo "No se encontraron productos más vendidos.";
                 }
             }
-
             curl_close($curl);
-        } else {
-            // Si el usuario no está logueado
-            echo '<p class="text-center">Por favor, <a href="#" onclick="showLoginForm()" style="color: #007bff; text-decoration: none; font-weight: bold;">inicia sesión</a> para ver tus recomendaciones personalizadas.</p>';
-
-
-            echo '<p style="text-align: center; font-weight: bold; font-size: 1.2em;">Revisa nuestros productos más vendidos:</p>';
-
-            mostrarMasVendidos($conexion);
         }
         ?>
     </div>
 </div>
-
-
-
-
-
 
 
 
