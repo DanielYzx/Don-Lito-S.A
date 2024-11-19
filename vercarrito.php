@@ -1,6 +1,15 @@
 <?php
 session_start();
 include 'conexion.php'; // Asegúrate de incluir la conexión a la base de datos
+// Verificar si el usuario ha iniciado sesión
+if (isset($_SESSION['user_email'])) {
+    $user_email = $_SESSION['user_email']; // Accede al correo guardado en la sesión
+    echo "Bienvenido, " . $user_email; // Puedes mostrar el correo o hacer otras cosas
+} else {
+    // Si no hay usuario logueado
+    echo "Por favor, inicie sesión.";
+}
+
 
 // Verifica si hay productos en el carrito
 if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
