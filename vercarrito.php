@@ -1,15 +1,17 @@
 <?php
 session_start();
-include 'conexion.php'; // Asegúrate de incluir la conexión a la base de datos
-// Verificar si el usuario ha iniciado sesión
-if (isset($_SESSION['user_email'])) {
-    $user_email = $_SESSION['user_email']; // Accede al correo guardado en la sesión
-    echo "Bienvenido, " . $user_email; // Puedes mostrar el correo o hacer otras cosas
-} else {
-    // Si no hay usuario logueado
-    echo "Por favor, inicie sesión.";
-}
 
+
+
+$_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actual
+// Verificamos si la variable 'user_email' está disponible
+if (isset($_SESSION['user_email'])) {
+    echo "Correo registrado: " . $_SESSION['user_email'];
+} else {
+    echo "No hay correo registrado en la sesión.";
+}
+include 'conexion.php';
+$user_email=$_SESSION['user_email'] ;
 
 // Verifica si hay productos en el carrito
 if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
@@ -23,8 +25,10 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     // Botón "Seguir Comprando"
     echo '<div style="text-align: right; margin-bottom: 20px;">';
     echo '<button class="btn-seguir" onclick="window.location.href=\'' . ($_SESSION['pagina_anterior'] ?? 'productos.php') . '\'">Seguir Comprando</button>'; // URL anterior o 'productos.php' como default
-    echo '<button class="btn-guardar" onclick="guardarPedido()">Guardar Pedido</button>';
-    echo '<button class="btn-generar" onclick="window.location.href=\'generar_pdf.php\'">Generar PDF</button>';
+    echo '<form action="guardar_pedido.php" method="post">
+            <button class="btn-guardar" type="submit" name="guardar_pedido">Guardar Pedido</button>
+          </form>';
+   
     echo '</div>';
     
     echo '<h1>Tu Carrito de Compras</h1>';
@@ -70,7 +74,7 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
                 <div class="cantidad-container">
                     <input type="number" value="' . $detalle['cantidad'] . '" min="1" max="' . $stock_maximo . '" class="cantidad-input" data-producto-id="' . $producto_id . '" onchange="mostrarBotonActualizar(' . $producto_id . ')">
                     
-                    <button class="btn-cancelar" data-producto-id="' . $producto_id . '" style="display:none;" onclick="cancelarCambio(' . $producto_id . ', ' . $detalle['cantidad'] .')">
+                    <button class="btn-cancelar" data-producto-id="' . $producto_id . '" style="display:none;" onclick="cancelarCambio(' . $producto_id . ', ' . $detalle['cantidad'] . ')">
                         <img src="img/cancelarcarrito.png" alt="Cancelar" style="width: 15px; height: 15px;">
                     </button>
                     <button class="btn-actualizar" data-producto-id="' . $producto_id . '" style="display:none;" onclick="actualizarCantidad(' . $producto_id . ', ' . $stock_maximo . ')">
@@ -98,15 +102,13 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     echo '<h2 class="text-left iva">IVA (13%): $' . number_format($iva, 2) . '</h2>'; // Mostrar el IVA
     echo '<h2 class="text-left total">Total a pagar: $' . number_format($total_con_iva, 2) . '</h2>'; // Total con IVA
     echo '<div class="text-left">'; // Div para alinear el botón
-    echo '<button class="btn-finalizar" onclick="enviar()">Enviar Pedido</button>'; // Botón para continuar comprando
-    echo '</div>'; // Cerrar div
-
     echo '</div>'; // Cerrar contenedor de carrito
 
 } else {
     echo '<p>No hay productos en el carrito.</p>';
 }
 ?>
+
 
 <script>
 function eliminarProducto(productoId) {
@@ -421,6 +423,7 @@ h2 {
 
 
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
 
 
 
