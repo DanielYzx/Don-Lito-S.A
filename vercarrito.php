@@ -16,10 +16,6 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     // Botón "Seguir Comprando"
     echo '<div style="text-align: right; margin-bottom: 20px;">';
     echo '<button class="btn-seguir" onclick="window.location.href=\'' . ($_SESSION['pagina_anterior'] ?? 'productos.php') . '\'">Seguirr Comprando</button>'; // URL anterior o 'productos.php' como default
-    echo '<form action="guardar_pedido.php" method="post">
-            <button class="btn-guardar" type="submit" name="guardar_pedido">Guardar Pedido</button>
-          </form>';
-   
     echo '</div>';
     
     echo '<h1>Tu Carrito de Compras</h1>';
@@ -93,6 +89,10 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     echo '<h2 class="text-left iva">IVA (13%): $' . number_format($iva, 2) . '</h2>'; // Mostrar el IVA
     echo '<h2 class="text-left total">Total a pagar: $' . number_format($total_con_iva, 2) . '</h2>'; // Total con IVA
     echo '<div class="text-left">'; // Div para alinear el botón
+    echo '<form action="guardar_pedido.php" method="post">
+            <button class="btn-guardar" type="submit" name="guardar_pedido">Enviar Pedido</button>
+          </form>';
+
     echo '</div>'; // Cerrar contenedor de carrito
 
 } else {
