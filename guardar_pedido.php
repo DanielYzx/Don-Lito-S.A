@@ -1,22 +1,12 @@
 <?php
 session_start();
 include 'conexion.php';
-
-
-$_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actual
-// Verificamos si la variable 'user_email' está disponible
-if (isset($_SESSION['user_email'])) {
-    echo "Correo registrado: " . $_SESSION['user_email'];
-} else {
-    echo "No hay correo registrado en la sesión.";
-}
-
 // Incluir PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 require 'C:\xampp\htdocs\Don-Lito-S.A\PHPMailer\src\Exception.php';
 require 'C:\xampp\htdocs\Don-Lito-S.A\PHPMailer\src\PHPMailer.php';
-require 'C:\xampp\htdocs\Don-Lito-S.A\PHPMailer\src\SMTP.php';
+ require 'C:\xampp\htdocs\Don-Lito-S.A\PHPMailer\src\SMTP.php';
 
 // Incluir TCPDF
 require_once('tcpdf/tcpdf.php');
@@ -27,15 +17,13 @@ if (!file_exists('pdfs')) {
 }
 
 if (isset($_POST['guardar_pedido']) && isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
-    // Recopilar los datos del pedido
     $usuario_id = $_SESSION['user_id'];
-    $user_email = $_SESSION['user_email'];  // Asignar el correo electrónico del usuario a la sesión
+    $user_email = $_SESSION['user_email']; 
 
     $total = 0;
     $productos_pedido = [];
 
     foreach ($_SESSION['carrito'] as $producto_id => $detalle) {
-        // Consulta para obtener el nombre y precio del producto desde la base de datos
         $sql = "SELECT nombre, precio FROM productos WHERE id = ?";
         if ($stmt = $conexion->prepare($sql)) {
             $stmt->bind_param('i', $producto_id);
@@ -44,8 +32,6 @@ if (isset($_POST['guardar_pedido']) && isset($_SESSION['carrito']) && !empty($_S
             $stmt->fetch();
             $stmt->close();
         }
-
-        // Asegurarse de que se hayan obtenido el nombre y el precio
         if (isset($nombre) && isset($precio)) {
             $cantidad = $detalle['cantidad'];
             $subtotal = $cantidad * $precio;
@@ -58,17 +44,14 @@ if (isset($_POST['guardar_pedido']) && isset($_SESSION['carrito']) && !empty($_S
                 'subtotal' => $subtotal
             ];
         } else {
-            // Manejar el caso en que no se pudo obtener el producto de la base de datos
             echo 'Error: Producto con ID ' . htmlspecialchars($producto_id) . ' no se encuentra en la base de datos.';
-            continue; // Saltar a la siguiente iteración del bucle
+            continue;
         }
     }
 
-    // Calcular el total sin IVA y el IVA
     $total_sin_iva = $total / 1.13;
     $iva = $total_sin_iva * 0.13;
 
-    // Insertar el pedido en la base de datos
     $sql = "INSERT INTO pedidos (usuario_id, fecha, total) VALUES (?, NOW(), ?)";
     if ($stmt = $conexion->prepare($sql)) {
         $stmt->bind_param('id', $usuario_id, $total);
@@ -77,7 +60,6 @@ if (isset($_POST['guardar_pedido']) && isset($_SESSION['carrito']) && !empty($_S
         $stmt->close();
     }
 
-    // Insertar los detalles del pedido
     foreach ($productos_pedido as $producto) {
         $sql = "INSERT INTO pedido_detalles (pedido_id, producto_id, cantidad, precio) VALUES (?, ?, ?, ?)";
         if ($stmt = $conexion->prepare($sql)) {
@@ -86,7 +68,6 @@ if (isset($_POST['guardar_pedido']) && isset($_SESSION['carrito']) && !empty($_S
             $stmt->close();
         }
 
-        // Actualiza la cantidad disponible del producto
         $sql_update = "UPDATE productos SET cantidad_disponible = cantidad_disponible - ? WHERE id = ?";
         if ($stmt_update = $conexion->prepare($sql_update)) {
             $stmt_update->bind_param('ii', $detalle['cantidad'], $producto_id);
@@ -95,7 +76,7 @@ if (isset($_POST['guardar_pedido']) && isset($_SESSION['carrito']) && !empty($_S
         }
     }
 
-    // Generar el PDF del pedido
+    // Generar el PDF
     $pdf = new TCPDF();
     $pdf->AddPage();
     $pdf->SetFont('helvetica', '', 12);
@@ -133,43 +114,38 @@ if (isset($_POST['guardar_pedido']) && isset($_SESSION['carrito']) && !empty($_S
     $html .= '</table>';
 
     $pdf->writeHTML($html);
-    $pdf_output = realpath('.') . DIRECTORY_SEPARATOR . 'pdfs' . DIRECTORY_SEPARATOR . 'pedido_' . $pedido_id . '.pdf';
+    $pdf_output = __DIR__ . '/pdfs/pedido_' . $pedido_id . '.pdf'; // Ruta absoluta del PDF
     $pdf->Output($pdf_output, 'F');
 
-    // Verificar si el correo electrónico está disponible
-    if (isset($_SESSION['user_email']) && !empty($_SESSION['user_email'])) {
-        // Enviar el PDF por correo electrónico
+    // Verificar si el archivo se creó correctamente
+    if (file_exists($pdf_output)) {
+        // Enviar el correo
+        
+
         $mail = new PHPMailer(true);
         try {
-            // Configuración del servidor de correo
             $mail->SMTPDebug = 0;
             $mail->isSMTP();
-            $mail->Host = 'localhost'; // Mailhog corre en localhost
-            $mail->Port = 1025; // Puerto por defecto de Mailhog
+            $mail->Host = 'localhost';
+            $mail->Port = 1025;
 
-            // Información del remitente
             $mail->setFrom('no-reply@mitienda.com', 'Mi Tienda');
-            $mail->addAddress($_SESSION['user_email']); // Correo del usuario
+            $mail->addAddress($_SESSION['user_email']);
 
-            // Contenido del correo
             $mail->isHTML(true);
             $mail->Subject = 'Detalles de tu Pedido';
-            $mail->Body    = 'Adjunto encontrarás los detalles de tu pedido. Gracias por comprar con nosotros.';
-
-            // Adjuntar el PDF
-            $mail->addAttachment($pdf_output);
+            $mail->Body = 'Adjunto encontrarás los detalles de tu pedido. Gracias por comprar con nosotros.';
+            $mail->addAttachment($pdf_output); // Adjuntar el PDF
 
             $mail->send();
-            echo 'El pedido ha sido guardado y el correo ha sido enviado.';
-        
+            echo 'El pedido ha sido guardado y el correo con el PDF ha sido enviado.';
         } catch (Exception $e) {
-            echo 'El pedido ha sido guardado pero no se pudo enviar el correo. Error: ', $mail->ErrorInfo;
+            echo 'El pedido se guardó, pero no se pudo enviar el correo. Error: ' . $mail->ErrorInfo;
         }
     } else {
-        echo 'No se pudo enviar el correo porque no hay un correo registrado en la sesión.';
+        echo 'El pedido se guardó, pero no se pudo generar el archivo PDF.';
     }
 
-    // Vaciar el carrito de compras
     unset($_SESSION['carrito']);
 }
 ?>
