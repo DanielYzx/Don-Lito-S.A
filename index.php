@@ -4,17 +4,6 @@ session_start();
 
 $_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actual
 
-
-
-// Verificar si el usuario ha iniciado sesión
-if (isset($_SESSION['user_email'])) {
-    $user_email = $_SESSION['user_email']; // Accede al correo guardado en la sesión
-    echo "Bienvenido, " . $user_email; // Puedes mostrar el correo o hacer otras cosas
-} else {
-    // Si no hay usuario logueado
-    echo "Por favor, inicie sesión.";
-}
-
 ?>
 
 

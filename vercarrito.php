@@ -1,17 +1,8 @@
 <?php
 session_start();
 
-
-
 $_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actual
-// Verificamos si la variable 'user_email' está disponible
-if (isset($_SESSION['user_email'])) {
-    echo "Correo registrado: " . $_SESSION['user_email'];
-} else {
-    echo "No hay correo registrado en la sesión.";
-}
 include 'conexion.php';
-$user_email=$_SESSION['user_email'] ;
 
 // Verifica si hay productos en el carrito
 if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
