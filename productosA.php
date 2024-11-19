@@ -1,357 +1,113 @@
 <?php
-// Inicia la sesión
-session_start();
+include 'conexion.php'; // Incluye la conexión a la base de datos
+session_start(); // Asegúrate de iniciar la sesión
+require_once('tcpdf/tcpdf.php'); // Incluye la librería TCPDF
 
-$_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actual
+// Configurar la zona horaria para El Salvador
+date_default_timezone_set('America/El_Salvador'); // Ajusta la zona horaria a El Salvador
 
-?>
+// Verifica si hay productos en el carrito
+if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
+     // Recupera el ID del usuario (esto depende de tu sistema de autenticación)
+     $usuario_id = $_SESSION['user_id'];  // Asegúrate de tener el usuario logueado
+     $total = 0; 
 
-<!DOCTYPE html>
-<html lang="en">
+     // Obtener el nombre del usuario desde la base de datos
+     $sql = "SELECT nombre FROM usuarios WHERE id = ?";
+     if ($stmt = $conexion->prepare($sql)) {
+         $stmt->bind_param('i', $usuario_id);
+         $stmt->execute();
+         $stmt->bind_result($nombre_usuario);
+         $stmt->fetch();
+         $stmt->close();
+     }
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pantalla Principal</title>
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="estilo.css">
-    <link rel="stylesheet" href="estilocarrito.css">
-</head>
+     // Crear un nuevo objeto TCPDF
+     $pdf = new TCPDF();
+     $pdf->AddPage(); // Añadir una página
+     $pdf->SetFont('helvetica', '', 12); // Definir la fuente
 
-<body>
-    <?php include 'conexion.php'; ?>
-    
-    <nav class="navbar navbar-light">
-        <div class="container-fluid">
-            <div class="row w-100 align-items-center">
-                <div class="col-6 col-md-2">
-                    <a class="navbar-brand" href="#">
-                        <img src="img/logo.png" alt="Logo" width="80" height="80">
-                    </a>
-                </div>
-                <div class="col-6 col-md-4 d-flex justify-content-end align-items-center order-md-2">
-                <?php if (isset($_SESSION['user_name'])): ?>
-                        <span class="me-2">Bienvenido, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                        <a href="cerrar_sesion.php?redirect=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="btn btn-danger">Cerrar sesión</a>   
-                    <?php else: ?>
-                        <img src="img/login.png" alt="User Icon" width="40" height="40" class="me-2">
-                        <button type="button" class="btn btn-primary" onclick="showLoginForm()">Inicia sesión</button>
-                    <?php endif; ?>
-                    <div class="vertical-divider"></div>
-                    <button type="button" class="btn" onclick="window.location.href='vercarrito.php';" width="40" height="40">
-               <img src="img/carrito.png" alt="Carrito Icon">
-                </button>
-                    <span>$ 0.00</span>
-                </div>
-                <div class="col-12 col-md-6 order-md-1">
-                    <form class="d-flex mt-2 mt-md-0" action="buscar.php" method="POST">
-                        <input class="form-control me-2" type="search" name="busqueda" placeholder="¿Qué estás buscando?" aria-label="Search">
-                        <button type="submit" class="btn btn-success">
-                            <img src="img/buscar.png" alt="Buscar" width="20" height="20">
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
+     // Fecha actual en la esquina derecha
+     $fecha_actual = date('d/m/Y'); // Formato de la fecha
+     $pdf->SetFont('helvetica', '', 10); // Cambiar tamaño de fuente para la fecha
+     $pdf->Cell(0, 10, 'Fecha: ' . $fecha_actual, 0, 1, 'R'); // Alineación derecha
+     $pdf->Ln(5); // Salto de línea
 
-    <div class="main-content">
+     // Título
+     $pdf->SetFont('helvetica', 'B', 16);
+     $pdf->Cell(0, 10, 'Tu Carrito de Compras', 0, 1, 'C');
+     $pdf->Ln(5);
 
+     // Nombre del usuario
+     $pdf->SetFont('helvetica', '', 12);
+     $pdf->Cell(0, 10, 'Cliente: ' . $nombre_usuario, 0, 1, 'L');
+     $pdf->Ln(5);
 
-       <!-- Aquí inicia el Contenedor del formulario de inicio de sesión -->
-    <?php if (!isset($_SESSION['user_name'])): ?>
-<div class="login-overlay" id="loginFormContainer">
-    <div class="login-form-container">
-        <button class="close-btn" id="closeBtn">&times;</button>
-        <h2>Iniciar Sesión</h2>
+     // Contador de productos
+     $contador_productos = count($_SESSION['carrito']);
+     $pdf->SetFont('helvetica', '', 12);
+     $pdf->Cell(0, 10, $contador_productos . ' artículo(s) agregado(s)', 0, 1, 'L');
+     $pdf->Ln(5);
 
+     // Tabla con los productos
+     $pdf->SetFont('helvetica', '', 10);
+     $pdf->SetFillColor(173, 216, 230); // Celeste para los encabezados
+     $pdf->Cell(60, 10, 'Producto', 1, 0, 'C', 1);
+     $pdf->Cell(30, 10, 'Cantidad', 1, 0, 'C', 1);
+     $pdf->Cell(40, 10, 'Precio', 1, 0, 'C', 1);
+     $pdf->Cell(40, 10, 'Total', 1, 1, 'C', 1);
 
-        <!-- Mostrar mensaje de error si existe -->
-<?php if (isset($_GET['error'])): ?>
-    <div id="errorMessage" class="alert alert-danger" >
-        <?php echo htmlspecialchars($_GET['error']); ?>
-    </div>
-<?php endif; ?>
+     // Recorrer los productos en el carrito
+     $total = 0;
+     foreach ($_SESSION['carrito'] as $producto_id => $detalle) {
+         // Validar si el precio es válido
+         if (!isset($detalle['precio']) || $detalle['precio'] <= 0) {
+             continue; // Si el precio no es válido, omite este producto
+         }
 
-        <form id="loginForm" action="procesar_login.php" method="POST"">
-        <input type="hidden" name="redirect_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>">
-            <div class="mb-3">
-                <label for="email" class="form-label">Correo Electrónico</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <div class="mb-3 text-end">
-            <a href="#" onclick="showResetForm()" class="text-muted">¿Olvidaste tu contraseña?</a>
-            </div>
-            <div class="d-flex justify-content-center">
-                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-            </div>
-            <div class="mt-3 text-center">
-            <a href="#" onclick="showRegisterForm()" class="text-muted">¿No tienes cuenta? Crea una ahora</a>
-            </div>
-        </form>
-    </div>
-</div>
-<?php endif; ?>
-    <!-- Aquí termina el Contenedor del formulario de inicio de sesión -->
+         // Consulta para obtener el nombre del producto y el precio desde la base de datos
+         $sql = "SELECT nombre, precio FROM productos WHERE id = ?";
+         if ($stmt = $conexion->prepare($sql)) {
+             $stmt->bind_param('i', $producto_id);
+             $stmt->execute();
+             $stmt->bind_result($nombre, $precio);
+             $stmt->fetch();
+             $stmt->close();
+         }
 
-        <!-- Formulario de Registro de Usuario -->
-        <?php if (!isset($_SESSION['user_name'])): ?>
-            <div class="register-overlay" id="registerFormContainer" style="display: <?php echo isset($_SESSION['error_register']) ? 'flex' : 'none'; ?>;">
-                <div class="register-form-container">
-                    <button class="close-btn" id="closeRegisterBtn">&times;</button>
-                    <h2>Crear Cuenta</h2>
+         // Usar el precio de la base de datos si está disponible
+         $precio = $precio ?? $detalle['precio'];
 
-                    <!-- Mensaje de error si existe -->
-                    <?php if (isset($_SESSION['error_register'])): ?>
-                        <div id="errorRegisterMessage" class="alert alert-danger">
-                            <?php echo htmlspecialchars($_SESSION['error_register']); ?>
-                            <?php unset($_SESSION['error_register']); ?>
-                        </div>
-                    <?php endif; ?>
+         // Calcular el total del producto
+         $subtotal = $detalle['cantidad'] * $precio;
+         $total += $subtotal;
 
-                    <form id="registerForm" action="procesar_registro.php" method="POST">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Nombre Completo</label>
-                            <input type="text" class="form-control" id="name" name="name" required value="<?php echo isset($_SESSION['form_data']['name']) ? htmlspecialchars($_SESSION['form_data']['name']) : ''; ?>">
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Correo Electrónico</label>
-                            <input type="email" class="form-control" id="registerEmail" name="email" required value="<?php echo isset($_SESSION['form_data']['email']) ? htmlspecialchars($_SESSION['form_data']['email']) : ''; ?>">
-                        </div>
-                        <div class="mb-3">
-                            <label for="direccion" class="form-label">Dirección</label>
-                            <input type="text" class="form-control" id="registerDireccion" name="direccion" required value="<?php echo isset($_SESSION['form_data']['direccion']) ? htmlspecialchars($_SESSION['form_data']['direccion']) : ''; ?>">
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="registerPassword" name="password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
-                            <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-primary">Crear Cuenta</button>
-                        </div>
-                        <div class="mt-3 text-center">
-                            <a href="#" onclick="showLoginForm()" class="text-muted">¿Ya tienes cuenta? Inicia sesión</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        <?php endif; ?>
+         // Mostrar fila en la tabla
+         $pdf->Cell(60, 10, $nombre, 1, 0, 'L');
+         $pdf->Cell(30, 10, $detalle['cantidad'], 1, 0, 'C');
+         $pdf->Cell(40, 10, '$' . number_format($precio, 2), 1, 0, 'C');
+         $pdf->Cell(40, 10, '$' . number_format($subtotal, 2), 1, 1, 'C');
+     }
 
-        <!-- Formulario para Restablecer Contraseña -->
-        <?php if (!isset($_SESSION['user_name'])): ?>
-            <div class="reset-overlay" id="resetFormContainer">
-                <div class="reset-form-container">
-                    <button class="close-btn" id="closeResetBtn">&times;</button>
-                    <h2>Restablecer Contraseña</h2>
+     // Calcular el total y el IVA
+     $total_sin_iva = $total / 1.13;
+     $iva = $total_sin_iva * 0.13;
+     $total_con_iva = $total;
 
-                    <!-- Mensaje de error si existe -->
-                    <?php if (isset($_GET['error_reset'])): ?>
-                        <div id="errorResetMessage" class="alert alert-danger">
-                            <?php echo htmlspecialchars($_GET['error_reset']); ?>
-                        </div>
-                    <?php endif; ?>
+     // Mostrar el subtotal, IVA y total
+$pdf->Ln(5);
+$pdf->SetFont('helvetica', '', 12); // Asegúrate de usar la misma fuente que para 'Cliente'
+$pdf->Cell(0, 10, 'Subtotal: $' . number_format($total_sin_iva, 2), 0, 1, 'L');
+$pdf->Cell(0, 10, 'IVA (13%): $' . number_format($iva, 2), 0, 1, 'L');
 
-                    <!-- Mensaje de éxito si existe -->
-                    <?php if (isset($_GET['success_reset'])): ?>
-                        <div id="successResetMessage" class="alert alert-success">
-                            <?php echo htmlspecialchars($_GET['success_reset']); ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <!-- Paso 1: Ingresar correo -->
-                    <form id="resetForm" action="procesar_reset_local.php" method="POST" style="display: <?php echo isset($_GET['show_reset_form']) ? 'block' : 'none'; ?>;">
-                        <div class="mb-3">
-                            <label for="resetEmail" class="form-label">Correo Electrónico</label>
-                            <input type="email" class="form-control" id="resetEmail" name="email" required>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-primary">Obtener Código de Restablecimiento</button>
-                        </div>
-                    </form>
-
-                    <!-- Paso 2: Ingresar código de validación (oculto inicialmente) -->
-                    <form id="validationForm" action="validar_codigo.php" method="POST" style="display: <?php echo isset($_GET['show_validation_code']) ? 'block' : 'none'; ?>;">
-                        <div class="mb-3">
-                            <label for="validationCode" class="form-label">Código de Validación</label>
-                            <input type="text" class="form-control" id="validationCode" name="validation_code" required>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-primary">Validar Código</button>
-                        </div>
-                    </form>
-
-                    <!-- Paso 3: Ingresar nueva contraseña (oculto inicialmente) -->
-                    <form id="newPasswordForm" action="procesar_nueva_contrasena.php" method="POST" style="display: <?php echo isset($_GET['show_new_password_form']) ? 'block' : 'none'; ?>;">
-                        <div class="mb-3">
-                            <label for="newPassword" class="form-label">Nueva Contraseña</label>
-                            <input type="password" class="form-control" id="newPassword" name="new_password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirmNewPassword" class="form-label">Confirmar Nueva Contraseña</label>
-                            <input type="password" class="form-control" id="confirmNewPassword" name="confirm_new_password" required>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-primary">Restablecer Contraseña</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        <?php endif; ?>
-        <!-- aqui termina el Formulario de olvido su contraseña -->
- <div class="row mt-3">
-    <div class="col-12 nav-container">
-        <!-- Contenedor de los botones de categorías -->
-        <div class="buttons-container">
-            <!-- Dropdown para todas las categorías -->
-            <div class="dropdown">
-                <button class="nav-buttons dropdown-toggle" id="btnCategorias" type="button">
-                    <img src="img/menu.png" alt="menu">
-                    Todas las categorías
-                </button>
-                <div class="dropdown-menu" id="subMenuCategorias">
-                    <?php
-                    // Consulta para obtener todas las categorías
-                    $sql = "SELECT id, nombre FROM categorias";
-                    $result = $conexion->query($sql);
-
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<div class="dropdown-submenu">';
-                            echo '<a class="dropdown-item" href="productos.php?categoria_id=' . $row["id"] . '">' . $row["nombre"] . '</a>';
-                            echo '</div>';
-                        }
-                    } else {
-                        echo '<a class="dropdown-item" href="#">No hay categorías disponibles</a>';
-                    }
-                    ?>
-                </div>
-            </div>
-
-            <!-- Botones de categorías adicionales -->
-            <button class="nav-buttons" onclick="location.href='productos.php?categoria_id=1'">Electrónica</button>
-            <button class="nav-buttons" onclick="location.href='productos.php?categoria_id=2'">Ropa</button>
-            <button class="nav-buttons" onclick="location.href='productos.php?categoria_id=3'">Hogar</button>
-            <button class="nav-buttons" onclick="location.href='productos.php?categoria_id=4'">Deportes</button>
-            <button class="nav-buttons" onclick="location.href='productos.php?categoria_id=5'">Bebidas</button>
-        </div>
-    </div>
-</div>
-
-<div class="contenedor-principal">
-<?php
-include('conexion.php'); // Incluir el archivo de conexión a la base de datos
-function usuarioLogueado() {
-    return isset($_SESSION['user_id']);
-}
+// Hacer que "Total a pagar" resalte
+$pdf->SetFont('helvetica', 'B', 12); // Usar negrita para resaltar el total
+$pdf->Cell(0, 10, 'Total a pagar: $' . number_format($total_con_iva, 2), 0, 1, 'L');
 
 
-if (isset($_POST['busqueda'])) {
-    $busqueda = $conexion->real_escape_string($_POST['busqueda']); // Sanitizar la entrada
-
-    // Consulta a la base de datos
-    $query = "SELECT * FROM productos WHERE nombre LIKE '%$busqueda%' OR descripción LIKE '%$busqueda%'";
-    $resultado = $conexion->query($query);
-
-    if ($resultado->num_rows > 0) {
-        echo "<h2>Resultados de búsqueda:</h2>";
-        echo '<div class="productos-container">';
-        while ($producto = $resultado->fetch_assoc()) {
-            echo '<div class="card-product">';
-        echo '<div class="card-product-img">';
-        echo '<img src="img/oferta1.jpg" alt="Imagen por defecto">';
-        echo '</div>';
-        echo '<div class="card-product-body">';
-        echo '<h2 class="card-product-title">' . htmlspecialchars($producto["nombre"]) . '</h2>';
-        echo '<p class="card-product-price">Precio: $' . htmlspecialchars($producto["precio"]) . '</p>';
-        echo '<p class="card-product-description">' . htmlspecialchars($producto["descripción"]) . '</p>';
-        echo '<p class="card-product-existencias">Existencias: ' . htmlspecialchars($producto["cantidad_disponible"]) . '</p>';
-        
-        if (usuarioLogueado()) {
-            // Determina si el producto está en el carrito
-            $enCarrito = isset($_SESSION['carrito'][$producto["id"]]);
-            
-            // Cambia el icono según el estado en el carrito
-            if ($enCarrito) {
-                echo '<button class="agregar-carrito-btn" onclick="eliminarDelCarrito(event, this)" data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
-                echo '<img src="img/eliminarcarrito.png" alt="Eliminar del carrito" style="width: 25px; height: 25px;"></button>';
-            } else {
-                echo '<button class="agregar-carrito-btn" onclick="handleAddToCart(event, this)" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
-                echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
-            }
-        } else {
-            echo '<button class="agregar-carrito-btn" onclick="showLoginForm()" ' . ($producto["cantidad_disponible"] <= 0 ? ' disabled' : '') . ' data-producto-id="' . htmlspecialchars($producto["id"]) . '">';
-            echo '<img src="img/agregarcarrito.png" alt="Añadir al carrito" style="width: 25px; height: 25px;"></button>';
-        }
-        
-        echo '</div>'; // Cerrar el cuerpo de la tarjeta
-        echo '</div>'; // Cerrar la tarjeta del producto
-        
-        }
-    } else {
-        echo "<p>No se encontraron resultados para '$busqueda'.</p>";
-    }
+     // Salida del PDF
+     $pdf->Output('carrito_compras.pdf', 'I'); // Mostrar el PDF en el navegador
 } else {
-    echo "<p>No se ha realizado ninguna búsqueda.</p>";
+    echo 'No hay productos en el carrito.';
 }
-
-$conexion->close(); // Cerrar la conexión
 ?>
-</div>
-<script src="js/bootstrap.bundle.min.js"></script>
-    <script src="validacionesformularios.js"></script>
-    <script src="empleados.js"></script>
-    <script src="validacionesproductos.js"></script>
-    <script src="validacioncarrito.js"></script>
-   <script src="scroll.js"></script>    
-   <script>
-    
-// Función para manejar añadir o eliminar del carrito
-function handleAddToCart(event, button) {
-    const img = button.querySelector('img');
-    const productId = button.getAttribute('data-producto-id');
-    const isLoggedIn = <?php echo json_encode(usuarioLogueado()); ?>;
-    if (!isLoggedIn) {
-        showLoginForm();
-        return;
-    }
-    const action = img.src.includes('agregarcarrito.png') ? 'add' : 'remove';
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'agregar_al_carrito.php', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            const response = JSON.parse(xhr.responseText);
-            if (response.success) {
-                if (action === 'add') {
-                    img.src = 'img/eliminarcarrito.png';
-                    img.alt = 'Eliminar del carrito';
-                    button.style.backgroundColor = '#dc3545';
-                    alert('Producto añadido al carrito.');
-                } else {
-                    img.src = 'img/agregarcarrito.png';
-                    img.alt = 'Añadir al carrito';
-                    button.style.backgroundColor = '#28a745';
-                    alert('Producto eliminado del carrito.');
-                }
-            } else {
-                alert('Error: ' + response.error);
-            }
-        } else {
-            alert('Error al procesar la solicitud.');
-        }
-    };
-    const postData = `producto_id=${productId}&action=${action}` + (action === 'add' ? '&cantidad=1' : '');
-    xhr.send(postData);
-}
-
-  </script>
-  </body>
-  </html>    

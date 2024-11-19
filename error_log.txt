@@ -1,0 +1,2 @@
+Column 'precio' cannot be nullColumn 'precio' cannot be null[18-Nov-2024 23:29:04 Europe/Berlin] PHP Warning:  Undefined array key "precio" in C:\xampp\htdocs\Don-Lito-S.A\guardar_pedido.php on line 31
+Column 'precio' cannot be nullColumn 'producto_id' cannot be nullColumn 'producto_id' cannot be nullColumn 'producto_id' cannot be nullColumn 'producto_id' cannot be nullColumn 'producto_id' cannot be nullColumn 'producto_id' cannot be nullColumn 'producto_id' cannot be null

@@ -14,6 +14,8 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     // Botón "Seguir Comprando"
     echo '<div style="text-align: right; margin-bottom: 20px;">';
     echo '<button class="btn-seguir" onclick="window.location.href=\'' . ($_SESSION['pagina_anterior'] ?? 'productos.php') . '\'">Seguir Comprando</button>'; // URL anterior o 'productos.php' como default
+    echo '<button class="btn-guardar" onclick="guardarPedido()">Guardar Pedido</button>';
+    echo '<button class="btn-generar" onclick="window.location.href=\'generar_pdf.php\'">Generar PDF</button>';
     echo '</div>';
     
     echo '<h1>Tu Carrito de Compras</h1>';
@@ -29,18 +31,27 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
 
     // Recorrer los productos en el carrito
     foreach ($_SESSION['carrito'] as $producto_id => $detalle) {
+        // Validar si el precio es válido
+        if (!isset($detalle['precio']) || $detalle['precio'] <= 0) {
+            echo '<p>Error: Producto con ID ' . htmlspecialchars($producto_id) . ' no tiene un precio válido.</p>';
+            continue; // Evita procesar este producto
+        }
+        
         // Consulta para obtener el nombre y stock máximo del producto desde la base de datos
-        $sql = "SELECT nombre, cantidad_disponible FROM productos WHERE id = ?";
+        $sql = "SELECT nombre, cantidad_disponible, precio FROM productos WHERE id = ?";
         if ($stmt = $conexion->prepare($sql)) {
             $stmt->bind_param('i', $producto_id);
             $stmt->execute();
-            $stmt->bind_result($nombre, $stock_maximo);
+            $stmt->bind_result($nombre, $stock_maximo, $precio);
             $stmt->fetch();
             $stmt->close();
         }
 
+        // Usar el precio de la base de datos si está disponible
+        $precio = $precio ?? $detalle['precio']; // Si el precio es nulo, usar el del carrito
+
         // Calcular el total del producto
-        $subtotal = $detalle['cantidad'] * $detalle['precio'];
+        $subtotal = $detalle['cantidad'] * $precio;
         $total += $subtotal;
 
         // Mostrar producto en la tabla
@@ -58,7 +69,7 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
                     </button>
                 </div>';
         echo '</td>';
-        echo '<td>$' . number_format($detalle['precio'], 2) . '</td>';
+        echo '<td>$' . number_format($precio, 2) . '</td>';
         echo '<td>$' . number_format($subtotal, 2) . '</td>';
         echo '<td>
                 <button class="btn-eliminar" onclick="eliminarProducto(' . $producto_id . ')">Eliminar</button>
@@ -87,6 +98,7 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     echo '<p>No hay productos en el carrito.</p>';
 }
 ?>
+
 <script>
 function eliminarProducto(productoId) {
     if (confirm("¿Estás seguro de que quieres eliminar este producto del carrito?")) {
@@ -155,6 +167,33 @@ function actualizarCantidad(productoId, stockMaximo) {
         alert("La cantidad debe ser mayor que cero.");
     }
 }
+function guardarPedido() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'guardar_pedido.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    alert('Pedido guardado exitosamente');
+                    location.reload();  // Recargar la página para reflejar los cambios
+                } else {
+                    alert('Error: ' + response.error);
+                }
+            } catch (e) {
+                alert('Error al procesar la respuesta: ' + e.message);
+            }
+        } else {
+            alert('Error en la solicitud: ' + xhr.statusText);
+        }
+    };
+
+    xhr.send();
+}
+
+
 function enviar() {
     // Recoge los productos y cantidades del carrito
     const productos = {};
@@ -336,6 +375,37 @@ h2 {
     margin: 10px 0; /* Espaciado mayor para resaltar el total */
     color: #000; /* Color negro para mayor énfasis */
 }
+
+.btn-guardar {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+.btn-guardar:hover {
+    background-color: #45a049;
+}
+
+.btn-generar {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+.btn-generar:hover {
+    background-color: #c82333;
+}
+
 
 </style>
 
