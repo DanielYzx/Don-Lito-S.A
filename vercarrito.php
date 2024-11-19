@@ -1,7 +1,10 @@
 <?php
 session_start();
 
-$_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actual
+if (!isset($_SESSION['pagina_anterior'])) {
+    $_SESSION['pagina_anterior'] = 'productos.php'; // Si no está definida, usar la página por defecto
+}
+
 include 'conexion.php';
 
 // Verifica si hay productos en el carrito
