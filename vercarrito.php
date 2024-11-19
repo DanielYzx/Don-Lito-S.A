@@ -24,7 +24,7 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     
     // Botón "Seguir Comprando"
     echo '<div style="text-align: right; margin-bottom: 20px;">';
-    echo '<button class="btn-seguir" onclick="window.location.href=\'' . ($_SESSION['pagina_anterior'] ?? 'productos.php') . '\'">Seguir Comprando</button>'; // URL anterior o 'productos.php' como default
+    echo '<button class="btn-seguir" onclick="window.location.href=\'' . ($_SESSION['pagina_anterior'] ?? 'productos.php') . '\'">Seguirr Comprando</button>'; // URL anterior o 'productos.php' como default
     echo '<form action="guardar_pedido.php" method="post">
             <button class="btn-guardar" type="submit" name="guardar_pedido">Guardar Pedido</button>
           </form>';
