@@ -85,6 +85,14 @@ if (isset($_POST['guardar_pedido']) && isset($_SESSION['carrito']) && !empty($_S
             $stmt->execute();
             $stmt->close();
         }
+
+        // Actualiza la cantidad disponible del producto
+        $sql_update = "UPDATE productos SET cantidad_disponible = cantidad_disponible - ? WHERE id = ?";
+        if ($stmt_update = $conexion->prepare($sql_update)) {
+            $stmt_update->bind_param('ii', $detalle['cantidad'], $producto_id);
+            $stmt_update->execute();
+            $stmt_update->close();
+        }
     }
 
     // Generar el PDF del pedido
