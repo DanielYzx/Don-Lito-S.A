@@ -141,7 +141,7 @@ $pdf->Cell(0, 10, 'Pedido N°: ' . $pedido_id, 0, 1, 'R');
 
    // Título principal
    $pdf->SetFont('helvetica', 'B', 18);
-   $pdf->Cell(0, 10, 'Detalle de Compras', 0, 1, 'C');
+   $pdf->Cell(0, 10, 'Detalle de Compra', 0, 1, 'C');
    $pdf->Ln(10);
 
    // Nombre del cliente
