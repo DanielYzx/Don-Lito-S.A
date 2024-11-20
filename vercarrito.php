@@ -7,11 +7,11 @@ if (!isset($_SESSION['pagina_anterior'])) {
 
 include 'conexion.php';
 
-// Verifica si hay productos en el carrito
+// Verifica si hay productoss en el carrito
 if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     // Contador para el total
     $total = 0;
-    // Contador para productos únicos
+    // Contador para productos únicoss
     $contador_productos = count($_SESSION['carrito']); // Contar productos únicos en el carrito
     
     echo '<div class="carrito-container">';
