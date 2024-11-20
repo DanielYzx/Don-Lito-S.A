@@ -41,7 +41,11 @@ $_SESSION['pagina_anterior'] = $_SERVER['REQUEST_URI']; // Almacena la URL actua
                     <button type="button" class="btn" onclick="window.location.href='vercarrito.php';" width="40" height="40">
                <img src="img/carrito.png" alt="Carrito Icon">
                 </button>
-                    <span>$ 0.00</span>
+                <span id="totalCarrito">
+                    <?php 
+                    echo isset($_SESSION['total_con_iva']) ? '$ ' . number_format($_SESSION['total_con_iva'], 2) : '$ 0.00';
+                        ?>
+                </span>
                 </div>
                 <div class="col-12 col-md-6 order-md-1">
                 <form class="d-flex mt-2 mt-md-0" action="buscar.php" method="GET">
@@ -350,6 +354,9 @@ function handleAddToCart(event, button) {
                     button.style.backgroundColor = '#28a745';
                     alert('Producto eliminado del carrito.');
                 }
+                // Actualizar el total con IVA sin recargar la página
+                actualizarTotalConIVA();
+                
             } else {
                 alert('Error: ' + response.error);
             }
@@ -360,6 +367,25 @@ function handleAddToCart(event, button) {
     const postData = `producto_id=${productId}&action=${action}` + (action === 'add' ? '&cantidad=1' : '');
     xhr.send(postData);
 }
+function actualizarTotalConIVA() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'obtener_total_con_iva.php', true); // Llama a un archivo PHP que te devolverá el total actualizado
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                const totalConIVA = document.getElementById('totalCarrito');
+                totalConIVA.textContent = '$ ' + parseFloat(response.totalConIVA).toFixed(2); // Actualiza el total en la página
+            } else {
+                console.error('Error al actualizar el total con IVA:', response.error);
+            }
+        } else {
+            console.error('Error al realizar la solicitud para el total con IVA.');
+        }
+    };
+    xhr.send();
+}
+
 
   </script>
   </body>

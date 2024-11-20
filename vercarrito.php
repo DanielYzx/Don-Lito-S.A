@@ -87,6 +87,9 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     // Calcular el total con IVA (que sigue siendo el mismo total)
     $total_con_iva = $total; // Este ya es el total que incluye IVA
 
+    // Guardar el total con IVA en una variable de sesión
+     $_SESSION['total_con_iva'] = $total_con_iva;
+
     echo '</table>';
     echo '<h2 class="text-left subtotal">Subtotal: $' . number_format($total_sin_iva, 2) . '</h2>'; // Total sin IVA
     echo '<h2 class="text-left iva">IVA (13%): $' . number_format($iva, 2) . '</h2>'; // Mostrar el IVA
@@ -99,7 +102,14 @@ if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
     echo '</div>'; // Cerrar contenedor de carrito
 
 } else {
-    echo '<p>No hay productos en el carrito.</p>';
+     // Borrar el total con IVA de la sesión
+     unset($_SESSION['total_con_iva']);
+    // Mostrar alerta si no hay productos en el carrito
+    echo "<script>
+            alert('No hay productos en el carrito. Serás redirigido a la página de productos.');
+            window.location.href = 'index.php';
+          </script>";
+
 }
 ?>
 
